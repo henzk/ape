@@ -1,0 +1,83 @@
+#
+# template to activate an ape environment
+# copy this and adapt it to your needs
+#
+# IMPORTANT: to activate it, source the script e.g. 
+# . activape_template
+#
+
+## determine directory of this script script (needs bash)
+#export APE_ACTIVATION_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#export BASE_DIR=`dirname ${THIS_DIR}`
+
+## push custom dependencies on the pythonpath
+#export PYTHONPATH=""
+
+## activate a virtualenv
+#source $BASE_DIR/venv/bin/activate
+
+## color used in prompt and welcome message
+APE_COLOR="\e[0;32m"
+RESET_COLOR="\e[m"
+
+APE_HOST=`hostname --fqdn`
+
+## use special colors for special host - e.g. red on production machine
+if [[ "$APE_HOST" == "myserver.mynetwork" ]]
+    then
+    export APE_COLOR="\e[0;34m"
+fi
+
+APE_BIN="python -m ape.main "
+APE_HOST_COLORED="\[${RESET_COLOR}\]@\[${APE_COLOR}\]${APE_HOST}"
+APE_ACTIVATED=1
+
+set_prompt() {
+    export PS1="\[${APE_COLOR}\](ape:\[${RESET_COLOR}\]${APE_CONTEXT}${APE_HOST_COLORED}\[${APE_COLOR}\])\[${RESET_COLOR}\]\n\w$ "
+}
+
+#modify prompt and print welcome message
+if [[ "$APE_OLDPROMPT" == "" ]]
+    then
+    export APE_OLDPROMPT=$PS1
+    set_prompt
+    echo ""
+    echo "                WELCOME TO"
+    echo "       a productive environment"
+    echo -e "${APE_COLOR}     poooo.   oo.ooooo.    .ooooo.  "
+    echo "         88b   888' \`88b  d88' \`88b "
+    echo "     ooP8888   888   888  888ooo888 "
+    echo "    88   888   888   888  888     . "
+    echo "     Y888\"\"8o  888bod8P'  \`Y8bod8P' "
+    echo -e "               888  "
+    echo -e "              o888o "
+    echo ""
+else
+    echo "ape already activaped"
+fi
+
+#ape shell function wrapper to allow ape to manipulate the
+#environment of the current shell
+ape() {
+    #whitelist your ape commands here
+    if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "teleport" ]]
+    then
+        _APE_RES=`$APE_BIN "$@"`
+        if [[ "$_APE_RES" == "#please execute the following in your shell:"* ]]
+        then
+            eval "$_APE_RES"
+        else
+            echo -e $_APE_RES
+        fi
+    else
+        $APE_BIN "$@"
+    fi
+}
+
+deactivape() {
+    export PS1=$APE_OLDPROMPT
+    unset APE_OLDPROMPT
+    unset APE_ACTIVATED
+    deactivate
+    echo "ape deactivaped"
+}
