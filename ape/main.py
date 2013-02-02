@@ -40,7 +40,7 @@ def invoke_task(task, args):
         pargs = parser.parse_args(args)
         task(**vars(pargs))
 
-def main(args, features=None):
+def run(args, features=None):
     '''
     composes task modules of the selected features and calls the
     task given by args
@@ -71,13 +71,31 @@ def main(args, features=None):
         except TaskNotFound:
             print 'Task "%s" not found! Use "ape help" to get usage information.' % taskname
 
-if __name__ == '__main__':
+def main():
     '''
     entry point when used via command line
     
     features are given using the environment variable PRODUCT_EQUATION.
+    If it is not set, PRODUCT_EQUATION_FILENAME is tried: if it points
+    to an existing equation file that selection is used.
+    If that fails ``ape.EnvironmentIncomplete`` is raised.
     '''
     import sys
     import os
+    #features can be specified inline in PRODUCT_EQUATION
     features = os.environ.get('PRODUCT_EQUATION', '').split()
-    main(sys.argv, features=features)
+    if not features:
+        #fallback: features are specified in equation file
+        feature_file = os.environ.get('PRODUCT_EQUATION_FILENAME', '')
+        if not feature_file:
+            from ape import EnvironmentIncomplete
+            raise EnvironmentIncomplete(
+                'Either the PRODUCT_EQUATION or '
+                'PRODUCT_EQUATION_FILENAME environment '
+                'variable needs to be set!'
+            )
+        features = featuremonkey.get_features_from_equation_file(feature_file)
+    run(sys.argv, features=features)
+
+if __name__ == '__main__':
+    main()

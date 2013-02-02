@@ -8,6 +8,8 @@ SHORT_HEADER = '''ape - a productive environment
 
 '''
 
+class EnvironmentIncomplete(Exception): pass
+
 class FeatureNotFound(Exception): pass
 
 class TaskNotFound(Exception): pass
