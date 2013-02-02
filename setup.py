@@ -1,20 +1,4 @@
 #! /usr/bin/env python
-DEPS = ['featuremonkey']
-try:
-    import importlib
-except ImportError:
-    DEPS += ['importlib']
-
-try:
-    from setuptools import setup
-    extra = {
-        'install_requires' : DEPS
-    }
-except ImportError:
-    from distutils.core import setup
-    extra = {
-        'dependencies' : DEPS
-    }
 
 def read(fname):
     import os.path
@@ -37,6 +21,7 @@ setup(
     packages=['ape'],
     package_dir={'ape': 'ape'},
     package_data={'ape': []},
+    zip_safe=False,
     include_package_data=True,
     scripts=[],
     classifiers=[
@@ -52,8 +37,4 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
     ],
-    dependency_links = [
-        'http://github.com/henzk/featuremonkey/tarball/master#egg=featuremonkey-0.1',
-    ],
-    **extra
 )
