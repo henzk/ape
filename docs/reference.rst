@@ -1,8 +1,13 @@
 ape Reference
 ======================
 
+.. _feature-modules:
+
 Feature modules
-----------------------
+====================
+
+Layout
+-------------
 
 Feature modules are Python Packages that contain a module called ``tasks``, so a minimal feature called ``myfeature`` would look like this::
 
@@ -11,6 +16,11 @@ Feature modules are Python Packages that contain a module called ``tasks``, so a
         tasks.py
 
 Feature modules need to be placed on the ``PYTHONPATH``.
+
+.. _task-functions:
+
+Task functions
+=====================
 
 Introduction of Tasks
 -----------------------
@@ -46,6 +56,7 @@ Finally, let`s invoke it::
 Refinement of Tasks
 --------------------
 
+::
 
     #anotherfeature/tasks.py
 
@@ -60,6 +71,8 @@ Refinement of Tasks
 
 Calling other tasks
 --------------------
+
+::
 
     #somefeature/tasks.py
 
