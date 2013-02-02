@@ -47,6 +47,7 @@ class Tasks(object):
         #import the module that tasks live in
         from . import _tasks
         self._tasks = _tasks
+        self._helper_names = set()
 
     def register(self, func):
         '''register a task - 
@@ -59,16 +60,29 @@ class Tasks(object):
             raise TaskAlreadyRegistered(func.__name__)
         setattr(self._tasks, func.__name__, func)
 
+    def register_helper(self, func):
+        '''a helper is a task that is not directly exposed to
+        the command line
+        '''
+        self.register(func)
+        self._helper_names.add(func.__name__)
+
     def get_tasks(self):
         '''
         return tasks as list of (name, function) tuples
         '''
-        return inspect.getmembers(self._tasks, inspect.isfunction)
+        def predicate(item):
+            return (inspect.isfunction(item) and 
+                item.__name__ not in self._helper_names
+            )
+        return inspect.getmembers(self._tasks, predicate)
 
-    def get_task(self, name):
+    def get_task(self, name, include_helpers=True):
         '''get task identified by name or raise TaskNotFound if there
         is no such task
         '''
+        if not include_helpers and name in self._helper_names:
+            raise TaskNotFound(name)
         try:
             return getattr(self._tasks, name)
         except AttributeError:
@@ -96,6 +110,7 @@ class Tasks(object):
                 print inspect.getdoc(task)
                 print
                 print 'defined in: ' + inspect.getfile(task)
+                print
             except TaskNotFound:
                 print 'Task "%s" not found! Use "ape help" to get usage information.' % taskname
 
