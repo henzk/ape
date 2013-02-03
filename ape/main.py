@@ -1,3 +1,11 @@
+import argparse
+import inspect
+import importlib
+import sys
+import os
+from ape import tasks, TaskNotFound, FeatureNotFound, EnvironmentIncomplete
+from featuremonkey import get_features_from_equation_file
+
 def get_task_parser(task):
     '''
     construct an ArgumentParser for task
@@ -6,8 +14,7 @@ def get_task_parser(task):
     if task accepts only positional and explicit keyword args, 
     proxy args is False.
     '''
-    import argparse
-    import inspect
+
     args, varargs, keywords, defaults = inspect.getargspec(task)
     defaults = defaults or []
     parser = argparse.ArgumentParser(
@@ -45,8 +52,6 @@ def run(args, features=None):
     composes task modules of the selected features and calls the
     task given by args
     '''
-    import importlib
-    from ape import tasks, TaskNotFound, FeatureNotFound
 
     features = features or []
     for feature in features:
@@ -80,21 +85,29 @@ def main():
     to an existing equation file that selection is used.
     If that fails ``ape.EnvironmentIncomplete`` is raised.
     '''
-    import sys
-    import os
+
+    #check APE_PREPEND_FEATURES
+    features = os.environ.get('APE_PREPEND_FEATURES', '').split()
     #features can be specified inline in PRODUCT_EQUATION
-    features = os.environ.get('PRODUCT_EQUATION', '').split()
-    if not features:
+    inline_features = os.environ.get('PRODUCT_EQUATION', '').split()
+    if inline_features:
+        #append inline features
+        features += inline_features
+    else:
         #fallback: features are specified in equation file
         feature_file = os.environ.get('PRODUCT_EQUATION_FILENAME', '')
-        if not feature_file:
-            from ape import EnvironmentIncomplete
-            raise EnvironmentIncomplete(
-                'Either the PRODUCT_EQUATION or '
-                'PRODUCT_EQUATION_FILENAME environment '
-                'variable needs to be set!'
-            )
-        features = featuremonkey.get_features_from_equation_file(feature_file)
+        if feature_file:
+            #append features from equation file
+            features += get_features_from_equation_file(feature_file)
+        else:
+            if not features:
+                raise EnvironmentIncomplete(
+                    'Either the PRODUCT_EQUATION or '
+                    'PRODUCT_EQUATION_FILENAME environment '
+                    'variable needs to be set!'
+                )
+
+    #run ape with features selected
     run(sys.argv, features=features)
 
 if __name__ == '__main__':
