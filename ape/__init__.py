@@ -16,6 +16,18 @@ class TaskNotFound(Exception): pass
 
 class TaskAlreadyRegistered(Exception): pass
 
+class InvalidAccess(Exception): pass
+
+def _get_invalid_accessor(func_name):
+
+    def invalid_accessor(*args, **kws):
+        raise InvalidAccess(
+            'task "%s" needs to be accessed as "ape.tasks.%s"!' % (
+                func_name, func_name
+            )
+        )
+
+    return invalid_accessor
 
 def get_signature(name, func):
     '''helper to generate a readable signature for a function'''
@@ -59,13 +71,14 @@ class Tasks(object):
         if hasattr(self._tasks, func.__name__):
             raise TaskAlreadyRegistered(func.__name__)
         setattr(self._tasks, func.__name__, func)
+        return _get_invalid_accessor(func.__name__)
 
     def register_helper(self, func):
         '''a helper is a task that is not directly exposed to
         the command line
         '''
-        self.register(func)
         self._helper_names.add(func.__name__)
+        return self.register(func)
 
     def get_tasks(self):
         '''
