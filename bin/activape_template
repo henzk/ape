@@ -6,40 +6,104 @@
 # . activape_template
 #
 
-## determine directory of this script script (needs bash)
-#export APE_ACTIVATION_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-#export BASE_DIR=`dirname ${THIS_DIR}`
+_init_ape() {
 
-## push custom dependencies on the pythonpath
-#export PYTHONPATH=""
+    ## determine directory of this script script (needs bash)
+    export APE_GLOBAL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    export APE_ROOT_DIR=`dirname ${APE_GLOBAL_DIR}`
 
-## activate a virtualenv
-#source $BASE_DIR/venv/bin/activate
+    export APE_VIRTUALENV=${APE_GLOBAL_DIR}/venv
+    export APE_PREPEND_FEATURES="ape.container_mode"
 
-## color used in prompt and welcome message
-APE_COLOR="\e[0;32m"
-RESET_COLOR="\e[m"
-
-APE_HOST=`hostname --fqdn`
-
-## use special colors for special host - e.g. red on production machine
-if [[ "$APE_HOST" == "myserver.mynetwork" ]]
-    then
-    export APE_COLOR="\e[0;34m"
-fi
-
-APE_BIN="python -m ape.main "
-APE_HOST_COLORED="\[${RESET_COLOR}\]@\[${APE_COLOR}\]${APE_HOST}"
-APE_ACTIVATED=1
-
-set_prompt() {
-    export PS1="\[${APE_COLOR}\](ape:\[${RESET_COLOR}\]${APE_CONTEXT}${APE_HOST_COLORED}\[${APE_COLOR}\])\[${RESET_COLOR}\]\n\w$ "
-}
-
-#modify prompt and print welcome message
-if [[ "$APE_OLDPROMPT" == "" ]]
-    then
+    ## push custom dependencies on the pythonpath
+    export APE_OLDPYTHONPATH=$PYTHONPATH
+    export APE_DEPS=""
+    export PYTHONPATH="${PYTHONPATH}:${APE_DEPS}"
     export APE_OLDPROMPT=$PS1
+
+    ## activate global virtualenv
+    source ${APE_VIRTUALENV}/bin/activate
+
+    ## color used in prompt and welcome message
+    APE_COLOR="\e[0;32m"
+    RESET_COLOR="\e[m"
+
+    APE_HOST=`hostname --fqdn`
+
+    ## use special colors for special host - e.g. red on production machine
+    if [[ "$APE_HOST" == "myserver.mynetwork" ]]
+        then
+        export APE_COLOR="\e[0;34m"
+    fi
+
+    APE_BIN="python -m ape.main "
+    APE_HOST_COLORED="\[${RESET_COLOR}\]@\[${APE_COLOR}\]${APE_HOST}"
+    export APE_ACTIVE="1"
+
+    set_prompt() {
+        export PS1="\[${APE_COLOR}\](ape:\[${RESET_COLOR}\]${APE_ENVIRONMENT}${APE_HOST_COLORED}\[${APE_COLOR}\])\[${RESET_COLOR}\]\n\w$ "
+    }
+
+    update_ape_env() {
+        export APE_ENVIRONMENT="${CONTAINER_NAME}:${PRODUCT_NAME}"
+        export CONTAINER_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}
+        export PRODUCT_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}/products/${PRODUCT_NAME}
+        export PYTHONPATH=${APE_DEPS}:${CONTAINER_DIR}/products:${CONTAINER_DIR}/features
+        export PRODUCT_EQUATION_FILENAME=${PRODUCT_DIR}/product.equation
+        export PRODUCT_CONTEXT_FILENAME=${PRODUCT_DIR}/context.json
+
+        if [ -f "${PRODUCT_DIR}/initenv" ]
+        then
+            source ${PRODUCT_DIR}/initenv
+
+        elif [ -f "${CONTAINER_DIR}/initenv" ]
+        then
+            source ${CONTAINER_DIR}/initenv
+
+        fi
+        set_prompt
+    }
+
+    #ape shell function wrapper to allow ape to manipulate the
+    #environment of the current shell
+    ape() {
+        #whitelist your ape commands here
+        if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "zap" ]]
+        then
+            _APE_RES=`$APE_BIN "$@"`
+            if [[ "$_APE_RES" == "#please execute the following in your shell:"* ]]
+            then
+                eval "$_APE_RES"
+            else
+                echo -e $_APE_RES
+            fi
+        else
+            $APE_BIN "$@"
+        fi
+    }
+
+    deactivape() {
+        export PS1=$APE_OLDPROMPT
+        export PYTHONPATH=$APE_OLDPYTHONPATH
+        unset APE_OLDPROMPT
+        unset APE_OLDPYTHONPATH
+        unset APE_VIRTUALENV
+        unset APE_ACTIVE
+        unset APE_ENVIRONMENT
+        unset APE_GLOBAL_DIR
+        unset APE_ROOT_DIR
+        unset APE_PREPEND_FEATURES
+        unset PRODUCT_EQUATION_FILENAME
+        unset PRODUCT_CONTEXT_FILENAME
+        unset PRODUCT_DIR
+        unset CONTAINER_DIR
+        unset PRODUCT_NAME
+        unset CONTAINER_NAME
+        deactivate
+        echo "ape deactivaped"
+    }
+
+    #modify prompt and print welcome message
     set_prompt
     echo ""
     echo "                WELCOME TO"
@@ -52,32 +116,12 @@ if [[ "$APE_OLDPROMPT" == "" ]]
     echo -e "               888  "
     echo -e "              o888o "
     echo ""
-else
+
+}
+
+if [[ "$APE_ACTIVE" == "1" ]]
+then
     echo "ape already activaped"
+else
+    _init_ape
 fi
-
-#ape shell function wrapper to allow ape to manipulate the
-#environment of the current shell
-ape() {
-    #whitelist your ape commands here
-    if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "teleport" ]]
-    then
-        _APE_RES=`$APE_BIN "$@"`
-        if [[ "$_APE_RES" == "#please execute the following in your shell:"* ]]
-        then
-            eval "$_APE_RES"
-        else
-            echo -e $_APE_RES
-        fi
-    else
-        $APE_BIN "$@"
-    fi
-}
-
-deactivape() {
-    export PS1=$APE_OLDPROMPT
-    unset APE_OLDPROMPT
-    unset APE_ACTIVATED
-    deactivate
-    echo "ape deactivaped"
-}
