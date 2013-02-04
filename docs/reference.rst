@@ -1,6 +1,3 @@
-ape Reference
-======================
-
 .. _feature-modules:
 
 Feature modules
@@ -16,6 +13,8 @@ Feature modules are Python Packages that contain a module called ``tasks``, so a
         tasks.py
 
 Feature modules need to be placed on the ``PYTHONPATH``.
+
+When using container mode, this part is managed for you.
 
 .. _task-functions:
 
@@ -56,6 +55,10 @@ Finally, let`s invoke it::
 Refinement of Tasks
 --------------------
 
+Here, we refine ``mynewtask`` in another feature.
+To do that, we need to specify a higher order function called ``refine_mynewtask`` that returns the refined function.
+The refined function can access the original implementation as ``original``.
+
 ::
 
     #anotherfeature/tasks.py
@@ -68,11 +71,18 @@ Refinement of Tasks
         return mynewtask
 
 
+``ape`` uses ``featuremonkey`` to compose the feature modules.
+For a more detailed description on the composition process, please see the ``featuremonkey`` documentation at http://featuremonkey.readthedocs.org\ .
+
 
 Calling other tasks
 --------------------
 
-::
+Often, tasks need to call other tasks. Functions decorated with ``ape.tasks.register`` cannot be called directly.
+This is a safety mechanism to protect against calling partially composed tasks.
+
+To call another task called ``mynewtask`` call ``ape.tasks.mynewtask``::
+
 
     #somefeature/tasks.py
 

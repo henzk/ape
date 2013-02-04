@@ -42,14 +42,32 @@ Tasks in container mode
 ---------------------------
 
 
-**cd**
+**cd** *poi*
+
+cd to a container or product inside a container.
+``poi`` is a string in one of these formats:
+
+- ``<container_name>`` e.g. ``ape cd mycontainer``
+- ``<container_name>:<product_name>`` e.g. ``ape cd mycontainer:myproduct``
 
 
-**switch**
+**switch** *poi*
+
+activate the environment of product specified by ``poi``
+``poi`` is a string in this format:
+
+- ``<container_name>:<product_name>`` e.g. ``ape switch mycontainer:myproduct``
 
 
-**teleport**
+**teleport** *poi*
 
+``ape switch`` and ``ape cd`` in one operation.
+
+``poi`` is a string in this format:
+
+- ``<container_name>:<product_name>`` e.g. ``ape teleport mycontainer:myproduct``
+
+Since ``teleport`` is quite long, and it`s all about productivity, ``zap`` is available as an alias for ``teleport``.
 
 
 
