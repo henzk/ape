@@ -44,10 +44,10 @@ setup(
     keywords='fosd, fop, features, build tool',
     packages=['ape'],
     package_dir={'ape': 'ape'},
-    package_data={'ape': []},
+    package_data={'ape': ['resources/activape_template']},
     zip_safe=False,
     include_package_data=True,
-    scripts=[],
+    scripts=['bin/bootstrape'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
