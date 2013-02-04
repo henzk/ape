@@ -1,8 +1,28 @@
 #! /usr/bin/env python
+
+DEPS = ['featuremonkey>=0.2.2']
+try:
+    #bundled with python since v2.7
+    import importlib
+except ImportError:
+    DEPS += ['importlib']
+
+try:
+    #bundled with python since v2.7
+    import argparse
+except ImportError:
+    DEPS += ['argparse']
+
 try:
     from setuptools import setup
+    extra = {
+        'install_requires' : DEPS
+    }
 except ImportError:
     from distutils.core import setup
+    extra = {
+        'dependencies' : DEPS
+    }
 
 def read(fname):
     import os.path
@@ -41,4 +61,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
     ],
+    **extra
 )
