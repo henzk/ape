@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+"""
+ape entry point when used in standalone mode
+otherwise this script is shadowed by a bash function
+"""
+from ape.main import main
+main()
