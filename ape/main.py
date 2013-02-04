@@ -101,11 +101,13 @@ def main():
             features += get_features_from_equation_file(feature_file)
         else:
             if not features:
-                raise EnvironmentIncomplete(
+                print (
+                    'Error running ape:\n'
                     'Either the PRODUCT_EQUATION or '
                     'PRODUCT_EQUATION_FILENAME environment '
                     'variable needs to be set!'
                 )
+                sys.exit(1)
 
     #run ape with features selected
     run(sys.argv, features=features)
