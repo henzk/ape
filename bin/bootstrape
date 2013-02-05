@@ -65,7 +65,7 @@ def main(args):
     print
     print '*** installing ape into virtualenv'
     print
-    venv.pip('install', '-e', 'git+https://github.com/henzk/ape.git#egg=ape')
+    venv.pip('install', 'ape')
 
     print 
     print '*** creating _ape/activape script'
