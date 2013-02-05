@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+from setuptools import setup, find_packages
+
 DEPS = ['featuremonkey>=0.2.2']
 try:
     #bundled with python since v2.7
@@ -13,24 +15,12 @@ try:
 except ImportError:
     DEPS += ['argparse']
 
-try:
-    from setuptools import setup
-    extra = {
-        'install_requires' : DEPS
-    }
-except ImportError:
-    from distutils.core import setup
-    extra = {
-        'dependencies' : DEPS
-    }
-
 def read(fname):
     import os.path
     try:
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
     except IOError:
         return ''
-
 
 setup(
     name='ape',
@@ -42,7 +32,7 @@ setup(
     author_email='hendrik@schnapptack.de',
     license="MIT License",
     keywords='fosd, fop, features, build tool',
-    packages=['ape'],
+    packages=find_packages(),
     package_dir={'ape': 'ape'},
     package_data={'ape': ['resources/activape_template']},
     zip_safe=False,
@@ -61,5 +51,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
     ],
-    **extra
+    install_requires=DEPS,
 )
