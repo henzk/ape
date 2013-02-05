@@ -67,7 +67,7 @@ activate the environment of product specified by ``poi``
 
 - ``<container_name>:<product_name>`` e.g. ``ape teleport mycontainer:myproduct``
 
-Since ``teleport`` is quite long, and it`s all about productivity, ``zap`` is available as an alias for ``teleport``.
+Since ``teleport`` is quite long, and it`s all about productivity, ``zap`` is available as an alias for ``teleport`` ;)
 
 
 

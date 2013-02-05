@@ -122,7 +122,12 @@ def switch(poi):
         )
 
 @tasks.register
-def zap(poi):
+def teleport(poi):
     '''switch and cd in one operation'''
     tasks.switch(poi)
     tasks.cd(poi)
+
+@tasks.register
+def zap(poi):
+    '''alias for "teleport"'''
+    tasks.teleport(poi)

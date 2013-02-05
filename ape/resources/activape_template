@@ -68,7 +68,7 @@ _init_ape() {
     #environment of the current shell
     ape() {
         #whitelist your ape commands here
-        if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "zap" ]]
+        if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "zap" || "$1" == "teleport" ]]
         then
             _APE_RES=`$APE_BIN "$@"`
             if [[ "$_APE_RES" == "#please execute the following in your shell:"* ]]
