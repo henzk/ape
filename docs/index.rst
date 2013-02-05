@@ -42,7 +42,8 @@ Contents
 
     install
     modes
-    reference
+    features
+    tasks
     tutorial
     changelog
 
