@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ape'
-copyright = u'2013, Hendrik Speidel'
+copyright = u'Hendrik Speidel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -95,7 +95,7 @@ exclude_patterns = []
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'default'
+#pygments_style = 'default'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
