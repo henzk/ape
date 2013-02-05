@@ -33,6 +33,14 @@ Now, ``ape`` should be available on your ``PATH``::
 Bootstrapping a container mode environment
 ==============================================
 
+Make sure you have ``pip`` and ``virtualenv`` installed.
+If not, try:
+
+    $ easy_install pip
+    $ pip install virtualenv
+
+On Debian/Ubuntu, these are also available as system packages ``python-pip`` and ``python-virtualenv``.
+
 If ``ape`` is not already installed globally, we need to fetch the script to bootstrap ``ape`` in container mode::
 
     $ wget https://raw.github.com/henzk/ape/master/bin/bootstrape
