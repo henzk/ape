@@ -42,9 +42,14 @@ def get_products(container_name):
 def info():
     '''list information about this productive environment'''
     print
-    print 'root directory  :', tasks.conf.APE_ROOT
+    print 'root directory         :', tasks.conf.APE_ROOT
     print
-    print 'active container:', os.environ.get('APE_CONTAINER_NAME', '')
+    print 'active container       :', os.environ.get('CONTAINER_NAME', '')
+    print
+    print 'active product         :', os.environ.get('PRODUCT_NAME', '')
+    print
+    print 'ape feature selection  :', tasks.FEATURE_SELECTION
+    print
     print 'containers and products:'
     print '-' * 30
     print

@@ -3,6 +3,7 @@ APE - a productive environment
 
 
 """
+FEATURE_SELECTION = []
 #Tasks specified here are globally available.
 #
 #WARNING: importing ape.tasks at the module level leads to a cyclic import

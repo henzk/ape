@@ -137,5 +137,6 @@ class Tasks(object):
     def superimpose(self, module):
         '''superimpose a task module on registered tasks'''
         featuremonkey.compose(module, self._tasks)
+        self._tasks.FEATURE_SELECTION.append(module.__name__)
 
 tasks = Tasks()
