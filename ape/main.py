@@ -71,10 +71,11 @@ def run(args, features=None):
         taskname = args[1]
         try:
             task = tasks.get_task(taskname, include_helpers=False)
-            remaining_args = args[2:] if len(args) > 2 else []
-            invoke_task(task, remaining_args)
         except TaskNotFound:
             print 'Task "%s" not found! Use "ape help" to get usage information.' % taskname
+        else:
+            remaining_args = args[2:] if len(args) > 2 else []
+            invoke_task(task, remaining_args)
 
 def main():
     '''
