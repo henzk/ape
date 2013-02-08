@@ -63,7 +63,8 @@ def run(args, features=None):
             tasks_module = importlib.import_module(feature + '.tasks')
             tasks.superimpose(tasks_module)
         except ImportError:
-            print 'No tasks module in feature %s. Skipping.' % feature
+            #No tasks module in feature ... skip it
+            pass
 
     if len(args) < 2 or (len(args) == 2 and args[1] == 'help'):
         tasks.help()
