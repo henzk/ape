@@ -18,6 +18,8 @@ class TaskAlreadyRegistered(Exception): pass
 
 class InvalidAccess(Exception): pass
 
+class InvalidTask(Exception): pass
+
 def _get_invalid_accessor(func_name):
 
     def invalid_accessor(*args, **kws):
@@ -47,7 +49,7 @@ def get_signature(name, func):
     elif not args and varargs and not keywords and not defaults:
         return name + '(*' + varargs + ')'
     else:
-        raise
+        raise InvalidTask('ape tasks may not use **kwargs')
 
 
 class Tasks(object):
