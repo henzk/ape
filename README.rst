@@ -9,13 +9,13 @@ ape - a productive environment
     ``ape`` is a make/rake/ant/fab-like system with support for FOSD.
 
 
-STATUS: **incomplete** - will be released bit by bit after removing internal stuff
-
 ``ape`` is short for "A Productive Environment". It provides a way to organize tasks in feature modules.
 Feature modules can introduce new tasks and refine tasks that have been introduced by other features.
 
 Tasks are defined as simple python functions. ``ape`` makes these task functions available from the command line
-and provides usage information by extracting the functions` docstrings.
+and provides usage information by extracting the functions' docstrings.
+
+``ape`` can be used to manage software product lines(SPL). SPLs are placed in containers that contain their features and products.
 
 Documentation: http://ape.readthedocs.org/
 
