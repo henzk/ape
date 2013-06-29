@@ -88,7 +88,7 @@ def cd(doi):
                 print 'cd ' + tasks.get_product_dir(container_name, product_name)
         else:
             print tasks.conf.SOURCE_HEADER
-            print 'cd ' + tasks.get_container_name(container_name)
+            print 'cd ' + tasks.get_container_dir(container_name)
 
 SWITCH_TEMPLATE = '''%(source_header)s
 
