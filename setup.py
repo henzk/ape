@@ -24,7 +24,7 @@ def read(fname):
 
 setup(
     name='ape',
-    version='0.2.0',
+    version='0.3.0',
     description='A Productive Environment - make/rake/ant/fab-like system with support for FOSD',
     long_description=read('README.rst'),
     url='http://github.com/henzk/ape',
