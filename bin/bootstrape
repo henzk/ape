@@ -59,7 +59,10 @@ def main(args):
     venv_dir = pj(_ape_dir, 'venv')
     print '*** creating virtualenv ', venv_dir
     print
-    call(['virtualenv', venv_dir, '--no-site-packages'])
+    try:
+        call(['virtualenv', venv_dir, '--no-site-packages'])
+    except OSError:
+        print 'You probably dont have virtualenv installed: sudo apt-get install python-virtualenv'
 
     venv = VirtualEnv(venv_dir)
     print
