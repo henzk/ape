@@ -23,6 +23,11 @@ _init_ape() {
 
     ## activate global virtualenv
     source ${APE_VIRTUALENV}/bin/activate
+    
+    if [ -f "${APE_ROOT_DIR}/initenv" ]
+        then
+            source ${APE_ROOT_DIR}/initenv
+    fi
 
     ## color used in prompt and welcome message
     APE_COLOR="\e[0;32m"
