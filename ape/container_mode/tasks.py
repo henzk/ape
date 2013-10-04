@@ -136,3 +136,30 @@ def teleport(poi):
 def zap(poi):
     '''alias for "teleport"'''
     tasks.teleport(poi)
+    
+    
+@tasks.register
+def install_container(container_name):
+    '''installs a container'''
+    
+    CONTAINER_DIR = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
+    if os.path.exists(CONTAINER_DIR):
+        os.environ['CONTAINER_DIR'] = CONTAINER_DIR
+    else:
+        print 'ERROR: this container does not exist!'
+        return
+    
+    install_script = os.path.join(CONTAINER_DIR, 'install.py')
+    if os.path.exists(install_script):
+        print '... running install.py for %s' % container_name
+        os.system('python %s' % install_script)
+    else:
+        print 'ERROR: this container does not provide an install.py!'
+        return 
+    
+    
+    
+    
+    
+    
+    
