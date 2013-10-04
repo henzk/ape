@@ -11,7 +11,7 @@ def get_ape_venv():
     '''
     return VirtualEnv(os.path.join(os.environ['APE_GLOBAL_DIR'], 'venv'))
     
-    
+
 def cleanup():
     '''
     Cleans up the installation directory.
