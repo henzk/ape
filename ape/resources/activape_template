@@ -13,12 +13,14 @@ _init_ape() {
     export APE_ROOT_DIR=`dirname ${APE_GLOBAL_DIR}`
 
     export APE_VIRTUALENV=${APE_GLOBAL_DIR}/venv
+    export APE_CONTAINER_VENV=""
     export APE_PREPEND_FEATURES="ape.container_mode"
 
-    ## push custom dependencies on the pythonpath
+    ## save old pythonpath
     export APE_OLDPYTHONPATH=$PYTHONPATH
     export APE_DEPS=""
-    export PYTHONPATH="${PYTHONPATH}:${APE_DEPS}"
+    export APE_GLOBAL_PYTHONPATH="${PYTHONPATH}:${APE_DEPS}"
+    export PYTHONPATH=$APE_GLOBAL_PYTHONPATH
     export APE_OLDPROMPT=$PS1
 
     ## activate global virtualenv
@@ -50,10 +52,35 @@ _init_ape() {
     }
 
     update_ape_env() {
+        if [ -n "$APE_CONTAINER_VENV" ]
+        then
+            #we teleport from container with venv to another container
+            #first deactivate active environment
+            deactivate
+            export PYTHONPATH=$APE_GLOBAL_PYTHONPATH
+            export APE_CONTAINER_VENV=""
+            ## activate global virtualenv
+            source ${APE_VIRTUALENV}/bin/activate
+        fi
         export APE_ENVIRONMENT="${CONTAINER_NAME}:${PRODUCT_NAME}"
         export CONTAINER_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}
         export PRODUCT_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}/products/${PRODUCT_NAME}
-        export PYTHONPATH=${APE_DEPS}:${CONTAINER_DIR}/products:${CONTAINER_DIR}/features
+
+        if [ -f "${CONTAINER_DIR}/_lib/venv/bin/activate" ]
+        then
+            deactivate
+            export APE_CONTAINER_VENV="${CONTAINER_DIR}/_lib/venv"
+            echo ""
+            echo "=> switched to virtualenv: ${APE_CONTAINER_VENV}"
+            echo ""
+            source ${APE_CONTAINER_VENV}/bin/activate
+        else
+            echo ""
+            echo "=> using global virtualenv: ${APE_VIRTUALENV}"
+            echo ""
+        fi
+
+        export PYTHONPATH=${PYTHONPATH}:${CONTAINER_DIR}/products:${CONTAINER_DIR}/features
         export PRODUCT_EQUATION_FILENAME=${PRODUCT_DIR}/product.equation
         export PRODUCT_CONTEXT_FILENAME=${PRODUCT_DIR}/context.json
 
@@ -89,12 +116,12 @@ _init_ape() {
 
     deactivape() {
         export PS1=$APE_OLDPROMPT
-        export PYTHONPATH=$APE_OLDPYTHONPATH
         unset APE_OLDPROMPT
         unset APE_OLDPYTHONPATH
         unset APE_VIRTUALENV
         unset APE_ACTIVE
         unset APE_ENVIRONMENT
+        unset APE_CONTAINER_VENV
         unset APE_GLOBAL_DIR
         unset APE_ROOT_DIR
         unset APE_PREPEND_FEATURES
@@ -105,6 +132,7 @@ _init_ape() {
         unset PRODUCT_NAME
         unset CONTAINER_NAME
         deactivate
+        export PYTHONPATH=$APE_OLDPYTHONPATH
         echo "ape deactivaped"
     }
 
@@ -120,6 +148,8 @@ _init_ape() {
     echo "     Y888\"\"8o  888bod8P'  \`Y8bod8P' "
     echo -e "               888  "
     echo -e "              o888o "
+    echo ""
+    echo "=> using global virtualenv: ${APE_VIRTUALENV}"
     echo ""
 
 }
