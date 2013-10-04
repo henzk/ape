@@ -155,11 +155,10 @@ def install_container(container_name):
         os.system('python %s' % install_script)
     else:
         print 'ERROR: this container does not provide an install.py!'
-        return 
-    
-    
-    
-    
-    
-    
-    
+        return
+
+@tasks.register_helper
+def get_extra_pypath(container_name=None):
+    from ape.installtools import pypath
+    return pypath.get_extra_pypath()
+
