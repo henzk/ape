@@ -34,11 +34,14 @@ def create_project_venv():
         sys.exit()
     
     try:
-        call(['virtualenv', venv_dir, '--no-site-packages'])
+        r = call(['virtualenv', venv_dir, '--no-site-packages'])
     except OSError:
         print 'ERROR: You probably dont have virtualenv installed: sudo apt-get install python-virtualenv'
         sys.exit()
         
+    if r != 0:
+        raise Exception('ERROR: please install virtualenv in your current env.')
+    
     print '... virtualenv successfully created'
     return VirtualEnv(venv_dir)
 
