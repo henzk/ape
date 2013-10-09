@@ -156,6 +156,20 @@ def install_container(container_name):
     else:
         print 'ERROR: this container does not provide an install.py!'
         return
+    
+    tasks.post_install_container()
+
+@tasks.register_helper
+def post_install_container():
+    '''
+    Refine this task to perform feature specific installations after the container
+    and its virtualenv have been installed. E.g. djpl-postgres refines this task
+    to link psycopg
+    '''
+    pass
+
+    
+
 
 @tasks.register_helper
 def get_extra_pypath(container_name=None):
