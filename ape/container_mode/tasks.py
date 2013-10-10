@@ -2,19 +2,24 @@ from ape import tasks
 import os
 import sys
 
+
 class Config(object):
     APE_ROOT = os.environ['APE_ROOT_DIR']
     SOURCE_HEADER = '#please execute the following in your shell:\n'
 
+
 introduce_conf = Config()
+
 
 @tasks.register_helper
 def get_container_dir(container_name):
     return tasks.conf.APE_ROOT + '/' + container_name
 
+
 @tasks.register_helper
 def get_product_dir(container_name, product_name):
     return tasks.get_container_dir(container_name) + '/products/' + product_name
+
 
 @tasks.register_helper
 def get_containers():
@@ -24,6 +29,7 @@ def get_containers():
         if os.path.isdir(tasks.get_container_dir(entry) + '/products'):
             containers.append(entry)
     return containers
+
 
 @tasks.register_helper
 def get_products(container_name):
@@ -37,6 +43,7 @@ def get_products(container_name):
 
     products = filter(predicate, products)
     return products
+
 
 @tasks.register
 def info():
@@ -58,6 +65,7 @@ def info():
         for product_name in tasks.get_products(container_name):
             print '    ' + product_name
     print
+
 
 @tasks.register
 def cd(doi):
@@ -90,12 +98,14 @@ def cd(doi):
             print tasks.conf.SOURCE_HEADER
             print 'cd ' + tasks.get_container_dir(container_name)
 
+
 SWITCH_TEMPLATE = '''%(source_header)s
 
 export CONTAINER_NAME=%(container_name)s
 export PRODUCT_NAME=%(product_name)s
 update_ape_env
 '''
+
 
 @tasks.register
 def switch(poi):
@@ -126,18 +136,20 @@ def switch(poi):
             product_name=product_name
         )
 
+
 @tasks.register
 def teleport(poi):
     '''switch and cd in one operation'''
     tasks.switch(poi)
     tasks.cd(poi)
 
+
 @tasks.register
 def zap(poi):
     '''alias for "teleport"'''
     tasks.teleport(poi)
-    
-    
+
+
 @tasks.register
 def install_container(container_name):
     '''installs a container'''
@@ -156,19 +168,6 @@ def install_container(container_name):
     else:
         print 'ERROR: this container does not provide an install.py!'
         return
-    
-    tasks.post_install_container()
-
-@tasks.register_helper
-def post_install_container():
-    '''
-    Refine this task to perform feature specific installations after the container
-    and its virtualenv have been installed. E.g. djpl-postgres refines this task
-    to link psycopg
-    '''
-    pass
-
-    
 
 
 @tasks.register_helper
