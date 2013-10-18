@@ -135,7 +135,12 @@ _init_ape() {
         export PYTHONPATH=$APE_OLDPYTHONPATH
         echo "ape deactivaped"
     }
-
+    
+    export -f ape
+    export APE_BIN
+    export -f deactivape
+    export -f deactivate
+    
     #modify prompt and print welcome message
     set_prompt
     echo ""
