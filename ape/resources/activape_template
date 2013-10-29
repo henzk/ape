@@ -164,4 +164,8 @@ then
     echo "ape already activaped"
 else
     _init_ape
+    if [ -n "$1" ]
+    then
+        ape zap "$1"
+    fi
 fi
