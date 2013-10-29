@@ -2,6 +2,7 @@
 import os
 import sys
 import shutil
+import stat
 from subprocess import call
 from os.path import join as pj
 
@@ -91,7 +92,7 @@ def main(args):
     print
 
     print 
-    print '*** creating _ape/activape script'
+    print '*** creating _ape/activape and aperun scripts'
     #get the activape_template from inside the ape package installed in venv
     activape_dst = pj(_ape_dir, 'activape')
     venv.python_oneliner(
@@ -103,8 +104,26 @@ def main(args):
          % activape_dst
     )
 
+    aperun_dst = pj(_ape_dir, 'aperun')
+    venv.python_oneliner(
+        'import os, shutil, pkg_resources;'
+        'shutil.copyfile(os.path.abspath('
+        'pkg_resources.resource_filename('
+        '"ape", "resources/aperun_template"'
+        ')), "%s")'
+         % aperun_dst
+    )
+
+    st = os.stat(aperun_dst)
+    os.chmod(aprun_dst, st.st_mode | stat.S_IEXEC)
+
     if not os.path.isfile(activape_dst):
         print '!!Error creating activape script!!'
+        print 'aborted'
+        sys.exit(1)
+
+    if not os.path.isfile(aperun_dst):
+        print '!!Error creating aperun script!!'
         print 'aborted'
         sys.exit(1)
 

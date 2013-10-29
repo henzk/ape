@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Activate a productive environment, switch
+# to a product and call a task in one single step
+# (may be useful for scripts)
+#
+
+CURRDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source ${CURRDIR}/activape
+POI="$1"
+shift
+ape zap $POI
+ape "$@"
+
