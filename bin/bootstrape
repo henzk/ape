@@ -115,7 +115,7 @@ def main(args):
     )
 
     st = os.stat(aperun_dst)
-    os.chmod(aprun_dst, st.st_mode | stat.S_IEXEC)
+    os.chmod(aperun_dst, st.st_mode | stat.S_IEXEC)
 
     if not os.path.isfile(activape_dst):
         print '!!Error creating activape script!!'
