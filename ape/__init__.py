@@ -2,7 +2,7 @@ import featuremonkey
 import inspect
 from functools import wraps
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 __author__ = 'Hendrik Speidel <hendrik@schnapptack.de>'
 SHORT_HEADER = '''ape - a productive environment
 
