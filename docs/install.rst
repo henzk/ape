@@ -31,7 +31,7 @@ Now, run ``bootstrape`` to create the container structure in a folder called ``a
 
     $ bootstrape aperoot
 
-To install the development version, run this instead:
+To install the development version, run this instead::
 
     $ bootstrape --dev aperoot
 
@@ -47,7 +47,7 @@ Congratulations! ``ape`` is now installed and container mode is activated.
 .. note::
 
     The ``bootstrape`` script creates the necessary folder structure, creates a virtualenv,
-    and installs ``ape`` into that environment. There, the latest stable version of ``ape`` is used ---
+    and installs ``ape`` into that environment. There, the latest stable/development version of ``ape`` is used ---
     even if you used the ``bootstrape`` script of another version!
 
     To use a custom version of ``ape`` in container mode,
