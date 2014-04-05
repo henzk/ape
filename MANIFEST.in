@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
+include AUTHORS
 include MANIFEST.in
 include ape/resources/activape_template
 include ape/resources/aperun_template
