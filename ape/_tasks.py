@@ -18,12 +18,12 @@ def help(task):
     tasks.help(taskname=task)
 
 
-def explain_features():
-    '''print the location of each feature and its version
+def explain_feature(featurename):
+    '''print the location of single feature and its version
 
     if the feature is located inside a git repository, this will also print the git-rev and modified files
     '''
-
+    
     import os
     import featuremonkey
     import importlib
@@ -56,10 +56,9 @@ def explain_features():
             stderr=subprocess.PIPE
         ).communicate()[0]
         return stdout.strip() or '-'
-
-    featurenames = featuremonkey.get_features_from_equation_file(os.environ['PRODUCT_EQUATION_FILENAME'])
-
-    for featurename in featurenames:
+        
+        
+    if featurename in featuremonkey.get_features_from_equation_file(os.environ['PRODUCT_EQUATION_FILENAME']): 
         print
         print featurename
         print '-' * 60
@@ -69,7 +68,6 @@ def explain_features():
             feature_module = importlib.import_module(featurename)
         except ImportError:
             print 'Error: unable to import feature "%s"' % featurename
-            continue
 
         print 'Location: %s' % os.path.dirname(feature_module.__file__)
         print
@@ -81,5 +79,24 @@ def explain_features():
             print
             print 'git: %s' % git_rev(feature_module)
             print
-            print 'git changed: %s' % '\n\t\t'.join(git_changes(feature_module).split('\n'))
+            print 'git changed: %s' % '\n\t\t'.join(git_changes(feature_module).split('\n'))    
+    else:
+        print 'No feature named ' + featurename
+   
+
+
+def explain_features():
+    
+    '''print the location of each feature and its version
+
+    if the feature is located inside a git repository, this will also print the git-rev and modified files
+    '''
+    from ape import tasks
+    import featuremonkey
+    import os
+    
+    featurenames = featuremonkey.get_features_from_equation_file(os.environ['PRODUCT_EQUATION_FILENAME'])
+
+    for featurename in featurenames:
+        tasks.explain_feature(featurename)
 
