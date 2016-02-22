@@ -13,38 +13,22 @@ class VirtualEnv(object):
     def call_bin(self, script_name, args):
         call([pj(self.bin_dir, script_name)] + list(args))
 
-
+   
     def pip_install(self, repo_url):
         self.call_bin('pip', ['install', '-e', 'git+%s' % repo_url])
-
-
-    def pip_install_requirements(self, file_path, credentials):
-        """
-        Installs a given requirements.txt applying credentials.
-        :param file_path: relative path to the requirements.txt
-        :param credentials: a dict with username and password
-        """
+        
+        
+    def pip_install_requirements(self, file_path):
         file_path = pj(os.environ['CONTAINER_DIR'], file_path)
-        temp_file_path = pj(os.environ['CONTAINER_DIR'], '__temp__requirements.txt')
+        self.call_bin('pip', ['install', '-r', file_path])
 
-        # read all requirements
-        with open(file_path) as f:
-            contents = f.read()
-        # apply credentials and write temp file
-        contents = contents % credentials
-        with open(temp_file_path, 'w') as f:
-            f.write(contents)
-
-        # install credential-augmented requirements and finally remove temp file.
-        self.call_bin('pip', ['install', '-r', temp_file_path])
-        os.remove(temp_file_path)
-
+    
     def get_paths(self):
         return [
             self.venv_dir,
             glob.glob('%s/lib/*/site-packages' % self.venv_dir)[0]
         ]
-
+   
 
 
     # -----------------
@@ -57,3 +41,6 @@ class VirtualEnv(object):
 
     def python_oneliner(self, snippet):
         self.python('-c', snippet)
+        
+        
+    

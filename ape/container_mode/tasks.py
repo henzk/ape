@@ -70,9 +70,9 @@ def info():
 @tasks.register
 def cd(doi):
     '''cd to directory of interest(doi)
-
+    
     a doi can be:
-
+    
     herbert - the container named "herbert"
     herbert:website - product "website" located in container "herbert"
     '''
@@ -110,11 +110,11 @@ update_ape_env
 @tasks.register
 def switch(poi):
     '''switch context to product of interest(poi)
-
+    
     a poi is:
-
+    
     herbert:website - for product "website" located in container "herbert"
-
+    
     After the context has been switched to herbert:website additional commands may be available
     that are relevant to herbert:website
     '''
@@ -151,24 +151,20 @@ def zap(poi):
 
 
 @tasks.register
-def install_container(container_name, username, password):
-    '''Installs a container.'''
-
+def install_container(container_name):
+    '''installs a container'''
+    
     CONTAINER_DIR = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
     if os.path.exists(CONTAINER_DIR):
         os.environ['CONTAINER_DIR'] = CONTAINER_DIR
     else:
         print 'ERROR: this container does not exist!'
         return
-
+    
     install_script = os.path.join(CONTAINER_DIR, 'install.py')
     if os.path.exists(install_script):
         print '... running install.py for %s' % container_name
-        os.system('python %(script)s %(username)s %(password)s' % dict(
-            script=install_script,
-            username=username,
-            password=password
-        ))
+        os.system('python %s' % install_script)
     else:
         print 'ERROR: this container does not provide an install.py!'
         return
@@ -178,3 +174,4 @@ def install_container(container_name, username, password):
 def get_extra_pypath(container_name=None):
     from ape.installtools import pypath
     return pypath.get_extra_pypath()
+
