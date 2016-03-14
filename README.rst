@@ -1,8 +1,8 @@
 ape - a productive environment
 ==============================
 
-.. image:: https://secure.travis-ci.org/henzk/ape.png
-   :target: http://travis-ci.org/henzk/ape
+.. image:: https://travis-ci.org/henzk/ape.svg?branch=master
+    :target: https://travis-ci.org/henzk/ape
 
 .. epigraph::
 
