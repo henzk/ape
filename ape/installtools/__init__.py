@@ -46,7 +46,7 @@ def create_project_venv():
     return VirtualEnv(venv_dir)
 
 
-def fetch_pool(repo_url):
+def fetch_pool(repo_url, branch='master'):
     '''
     Fetches a git repository from ``repo_url`` and returns a ``FeaturePool`` object.
     '''
@@ -67,7 +67,13 @@ def fetch_pool(repo_url):
     if a != 0:
         print 'ERROR: check your repository url and credentials!'
         sys.exit()
-    
+
+    try:
+        call(['git', 'checkout', branch], cwd=os.path.join(lib_dir, repo_name))
+    except OSError:
+        print 'ERROR: cannot switch branches'
+        sys.exit()
+
     print '... repository successfully cloned'
     return FeaturePool(os.path.join(lib_dir, repo_name))
     
