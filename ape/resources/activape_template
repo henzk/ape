@@ -48,7 +48,7 @@ _init_ape() {
     export APE_ACTIVE="1"
 
     set_prompt() {
-        export PS1="\[${APE_COLOR}\](ape:\[${RESET_COLOR}\]${APE_ENVIRONMENT}${APE_HOST_COLORED}\[${APE_COLOR}\])\[${RESET_COLOR}\]\n\w$ "
+        export PS1="\u\[${APE_COLOR}\](ape:\[${RESET_COLOR}\]${APE_ENVIRONMENT}${APE_HOST_COLORED}\[${APE_COLOR}\])\[${RESET_COLOR}\]\n\w$ "
     }
 
     update_ape_env() {
