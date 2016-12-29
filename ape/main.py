@@ -3,6 +3,7 @@ import inspect
 import importlib
 import sys
 import os
+import traceback
 from ape import tasks, TaskNotFound, FeatureNotFound, EnvironmentIncomplete
 from featuremonkey import get_features_from_equation_file
 
@@ -11,7 +12,7 @@ def get_task_parser(task):
     construct an ArgumentParser for task
     this function returns a tuple (parser, proxy_args)
     if task accepts varargs only, proxy_args is True.
-    if task accepts only positional and explicit keyword args, 
+    if task accepts only positional and explicit keyword args,
     proxy args is False.
     '''
 
@@ -82,11 +83,14 @@ def run(args, features=None):
 def main():
     '''
     entry point when used via command line
-    
-    features are given using the environment variable PRODUCT_EQUATION.
-    If it is not set, PRODUCT_EQUATION_FILENAME is tried: if it points
+
+    features are given using the environment variable ``PRODUCT_EQUATION``.
+    If it is not set, ``PRODUCT_EQUATION_FILENAME`` is tried: if it points
     to an existing equation file that selection is used.
-    If that fails ``ape.EnvironmentIncomplete`` is raised.
+
+    (if ``APE_PREPEND_FEATURES`` is given, those features are prepended)
+
+    If the list of features is empty, ``ape.EnvironmentIncomplete`` is raised.
     '''
 
     #check APE_PREPEND_FEATURES
@@ -104,16 +108,19 @@ def main():
             features += get_features_from_equation_file(feature_file)
         else:
             if not features:
-                print (
+                raise EnvironmentIncomplete(
                     'Error running ape:\n'
                     'Either the PRODUCT_EQUATION or '
                     'PRODUCT_EQUATION_FILENAME environment '
                     'variable needs to be set!'
                 )
-                sys.exit(1)
 
     #run ape with features selected
     run(sys.argv, features=features)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit(1)
