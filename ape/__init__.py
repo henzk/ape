@@ -35,14 +35,15 @@ def get_signature(name, func):
     '''helper to generate a readable signature for a function'''
     args, varargs, keywords, defaults = inspect.getargspec(func)
     defaults = defaults or []
+    posargslen = len(args) - len(defaults)
     if varargs is None and keywords is None:
         sig = name + '('
         sigargs = []
         for idx, arg in enumerate(args):
-            if idx < len(args) - len(defaults):
+            if idx < posargslen:
                 sigargs.append(arg)
             else:
-                default = repr(defaults[idx - len(defaults)])
+                default = repr(defaults[idx - posargslen])
                 sigargs.append(arg + '=' + default)
         sig += ', '.join(sigargs) + ')'
         return sig
