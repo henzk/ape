@@ -23,12 +23,13 @@ def get_task_parser(task):
         description = task.__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+    posargslen = len(args) - len(defaults)
     if varargs is None and keywords is None:
         for idx, arg in enumerate(args):
-            if idx < len(args) - len(defaults):
+            if idx < posargslen:
                 parser.add_argument(arg)
             else:
-                default = defaults[idx - len(defaults)]
+                default = defaults[idx - posargslen]
                 parser.add_argument('--' + arg, default=default)
         return parser, False
     elif not args and varargs and not keywords and not defaults:
