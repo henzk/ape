@@ -70,9 +70,9 @@ def info():
 @tasks.register
 def cd(doi):
     '''cd to directory of interest(doi)
-    
+
     a doi can be:
-    
+
     herbert - the container named "herbert"
     herbert:website - product "website" located in container "herbert"
     '''
@@ -110,11 +110,11 @@ update_ape_env
 @tasks.register
 def switch(poi):
     '''switch context to product of interest(poi)
-    
+
     a poi is:
-    
+
     herbert:website - for product "website" located in container "herbert"
-    
+
     After the context has been switched to herbert:website additional commands may be available
     that are relevant to herbert:website
     '''
@@ -153,14 +153,14 @@ def zap(poi):
 @tasks.register
 def install_container(container_name):
     '''installs a container'''
-    
+
     CONTAINER_DIR = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
     if os.path.exists(CONTAINER_DIR):
         os.environ['CONTAINER_DIR'] = CONTAINER_DIR
     else:
         print 'ERROR: this container does not exist!'
         return
-    
+
     install_script = os.path.join(CONTAINER_DIR, 'install.py')
     if os.path.exists(install_script):
         print '... running install.py for %s' % container_name
@@ -175,3 +175,54 @@ def get_extra_pypath(container_name=None):
     from ape.installtools import pypath
     return pypath.get_extra_pypath()
 
+
+@tasks.register
+def export_config_to_equation(poi=None):
+    """
+    Generates a product.equation file for the given product name.
+    It generates it from the <product_name>.config file in the products folder.
+    For that you need to have your project imported to featureIDE and set the correct settings.
+    """
+    import os
+    config_file_path = None
+    equation_file_path = None
+    if poi:
+        parts = poi.split(':')
+        if len(parts) == 2:
+            container_name, product_name = parts
+            if container_name not in tasks.get_containers():
+                print('No such container')
+            elif product_name not in tasks.get_products(container_name):
+                print('No such product')
+            else:
+                cont_dir = tasks.get_container_dir(container_name)
+                equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
+                config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
+        else:
+            print('Please check your arguments: --poi <container>:<product>')
+    else:
+        cont_dir = os.environ.get('CONTAINER_DIR')
+        equation_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME'), 'product.equation')
+        config_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME') + '.config')
+    if equation_file_path and config_file_path:
+        config_new = list()
+        try:
+            with open(config_file_path, 'r') as config_file:
+                config_old = config_file.readlines()
+                for line in config_old:
+                    # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
+                    # e.g. django_productline__features__development
+                    if len(line.split('__')) <= 2:
+                        config_new.append(line)
+                    else:
+                        config_new.append(line.replace('__', '.'))
+        except IOError as e:
+            print('Config file not found. Please make sure you have a valid .config-file in your products folder.\n'
+                  ' Also make sure that this file has the same name as your product.')
+        try:
+            with open(equation_file_path, 'w+') as eq_file:
+                eq_file.writelines(config_new)
+        except IOError as e:
+            print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
+    else:
+        print('Please check your arguments: --poi <container>:<product>')
