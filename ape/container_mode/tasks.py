@@ -226,3 +226,56 @@ def export_config_to_equation(poi=None):
             print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
     else:
         print('Please check your arguments: --poi <container>:<product>')
+
+
+@tasks.register
+def import_config_from_equation(poi=None):
+    """
+    Generates a <productname>.config file from the product.equation of the given (or activated) product name and places it in your products dir.
+    """
+    import os
+    config_file_path = None
+    equation_file_path = None
+    if poi:
+        parts = poi.split(':')
+        if len(parts) == 2:
+            container_name, product_name = parts
+            if container_name not in tasks.get_containers():
+                print('No such container')
+            elif product_name not in tasks.get_products(container_name):
+                print('No such product')
+            else:
+                cont_dir = tasks.get_container_dir(container_name)
+                equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
+                config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
+        else:
+            print('Please check your arguments: --poi <container>:<product>')
+    else:
+        # If a product is already activated it gets selected automatically if no arguments are passed.
+        product_name = os.environ.get('PRODUCT_NAME')
+        cont_dir = os.environ.get('CONTAINER_DIR')
+        equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
+        config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
+    if equation_file_path and config_file_path:
+        config_new = list()
+        try:
+            with open(equation_file_path, 'r') as eq_file:
+                config_old = eq_file.readlines()
+                for line in config_old:
+                    # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
+                    # e.g. django_productline__features__development
+                    if not line.startswith('#'):
+                        if len(line.split('.')) <= 2:
+                            config_new.append(line)
+                        else:
+                            config_new.append(line.replace('.', '__'))
+        except IOError as e:
+            print('Equation file not found. Please make sure you have a valid product.equation in your products/<product_name>/. \n')
+        try:
+            with open(config_file_path, 'w+') as config_file:
+                config_file.writelines(config_new)
+        except IOError as e:
+            print('{product_name}.config file not found. \n '
+                  'Please make sure you have a valid <product_name>.config in your products directory.'.format(product_name=product_name))
+    else:
+        print('Please check your arguments: --poi <container>:<product>')
