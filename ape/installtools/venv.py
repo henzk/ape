@@ -1,5 +1,4 @@
-from subprocess import call
-from os.path import join as pj
+from subprocess import check_call
 import glob
 import os
 
@@ -8,10 +7,10 @@ class VirtualEnv(object):
 
     def __init__(self, venv_dir):
         self.venv_dir = venv_dir
-        self.bin_dir = pj(venv_dir, 'bin')
+        self.bin_dir = os.path.join(venv_dir, 'bin')
 
     def call_bin(self, script_name, args):
-        call([pj(self.bin_dir, script_name)] + list(args))
+        check_call([os.path.join(self.bin_dir, script_name)] + list(args))
 
    
     def pip_install(self, repo_url):
@@ -19,7 +18,7 @@ class VirtualEnv(object):
         
         
     def pip_install_requirements(self, file_path):
-        file_path = pj(os.environ['CONTAINER_DIR'], file_path)
+        file_path = os.path.join(os.environ['CONTAINER_DIR'], file_path)
         self.call_bin('pip', ['install', '-r', file_path])
 
     
