@@ -1,6 +1,7 @@
 from ape import tasks
 import os
 import sys
+import subprocess
 
 
 class Config(object):
@@ -164,7 +165,7 @@ def install_container(container_name):
     install_script = os.path.join(CONTAINER_DIR, 'install.py')
     if os.path.exists(install_script):
         print '... running install.py for %s' % container_name
-        os.system('python %s' % install_script)
+        subprocess.check_call(['python', install_script])
     else:
         print 'ERROR: this container does not provide an install.py!'
         return
