@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, print_function, division
 from ape import tasks
 import os
 import sys
@@ -47,56 +48,59 @@ def get_products(container_name):
 
 @tasks.register
 def info():
-    '''list information about this productive environment'''
-    print
-    print 'root directory         :', tasks.conf.APE_ROOT
-    print
-    print 'active container       :', os.environ.get('CONTAINER_NAME', '')
-    print
-    print 'active product         :', os.environ.get('PRODUCT_NAME', '')
-    print
-    print 'ape feature selection  :', tasks.FEATURE_SELECTION
-    print
-    print 'containers and products:'
-    print '-' * 30
-    print
+    """
+    List information about this productive environment
+    """
+    print()
+    print('root directory         :', tasks.conf.APE_ROOT)
+    print()
+    print('active container       :', os.environ.get('CONTAINER_NAME', ''))
+    print()
+    print('active product         :', os.environ.get('PRODUCT_NAME', ''))
+    print()
+    print('ape feature selection  :', tasks.FEATURE_SELECTION)
+    print()
+    print('containers and products:')
+    print('-' * 30)
+    print()
     for container_name in tasks.get_containers():
-        print container_name
+        print(container_name)
         for product_name in tasks.get_products(container_name):
-            print '    ' + product_name
-    print
+            print('    ' + product_name)
+    print()
 
 
 @tasks.register
 def cd(doi):
-    '''cd to directory of interest(doi)
-
+    """
+    cd to directory of interest(doi)
     a doi can be:
-
     herbert - the container named "herbert"
     herbert:website - product "website" located in container "herbert"
-    '''
+    :param doi:
+    :return:
+    """
     parts = doi.split(':')
     if len(parts) == 1:
         container_name, product_name = parts[0], None
     elif len(parts) == 2:
         container_name, product_name = parts[0], parts[1]
     else:
-        print 'unable to parse context - format: <container_name>:<product_name>'
+        print('unable to parse context - format: <container_name>:<product_name>')
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
-        print 'No such container'
+        print('No such container')
     else:
         if product_name:
             if product_name not in tasks.get_products(container_name):
-                print 'No such product'
+                print('No such product')
             else:
-                print tasks.conf.SOURCE_HEADER
-                print 'cd ' + tasks.get_product_dir(container_name, product_name)
+                print(tasks.conf.SOURCE_HEADER)
+                print('cd ' + tasks.get_product_dir(container_name, product_name))
         else:
-            print tasks.conf.SOURCE_HEADER
-            print 'cd ' + tasks.get_container_dir(container_name)
+            print(tasks.conf.SOURCE_HEADER)
+            print('cd ' + tasks.get_container_dir(container_name))
 
 
 SWITCH_TEMPLATE = '''%(source_header)s
@@ -122,19 +126,19 @@ def switch(poi):
     if len(parts) == 2:
         container_name, product_name = parts
     else:
-        print 'unable to parse context: ', poi
+        print('unable to parse context: ', poi)
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
-        print 'No such container'
+        print('No such container')
     elif product_name not in tasks.get_products(container_name):
-        print 'No such product'
+        print('No such product')
     else:
-        print SWITCH_TEMPLATE % dict(
+        print(SWITCH_TEMPLATE % dict(
             source_header=tasks.conf.SOURCE_HEADER,
             container_name=container_name,
             product_name=product_name
-        )
+        ))
 
 
 @tasks.register
@@ -158,15 +162,15 @@ def install_container(container_name):
     if os.path.exists(CONTAINER_DIR):
         os.environ['CONTAINER_DIR'] = CONTAINER_DIR
     else:
-        print 'ERROR: this container does not exist!'
+        print('ERROR: this container does not exist!')
         return
 
     install_script = os.path.join(CONTAINER_DIR, 'install.py')
     if os.path.exists(install_script):
-        print '... running install.py for %s' % container_name
+        print('... running install.py for %s' % container_name)
         os.system('python %s' % install_script)
     else:
-        print 'ERROR: this container does not provide an install.py!'
+        print('ERROR: this container does not provide an install.py!')
         return
 
 
@@ -183,46 +187,33 @@ def export_config_to_equation(poi=None):
     It generates it from the <product_name>.config file in the products folder.
     For that you need to have your project imported to featureIDE and set the correct settings.
     """
-    import os
-    config_file_path = None
-    equation_file_path = None
+
+    from ape.container_mode import equation_generator as generator
+    from ape.container_mode import exceptions
+
     if poi:
         parts = poi.split(':')
         if len(parts) == 2:
             container_name, product_name = parts
             if container_name not in tasks.get_containers():
                 print('No such container')
+                return
             elif product_name not in tasks.get_products(container_name):
                 print('No such product')
-            else:
-                cont_dir = tasks.get_container_dir(container_name)
-                equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
-                config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
+                return
+
+            container_dir = tasks.get_container_dir(container_name)
+
         else:
             print('Please check your arguments: --poi <container>:<product>')
+            return
     else:
-        cont_dir = os.environ.get('CONTAINER_DIR')
-        equation_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME'), 'product.equation')
-        config_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME') + '.config')
-    if equation_file_path and config_file_path:
-        config_new = list()
-        try:
-            with open(config_file_path, 'r') as config_file:
-                config_old = config_file.readlines()
-                for line in config_old:
-                    # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
-                    # e.g. django_productline__features__development
-                    if len(line.split('__')) <= 2:
-                        config_new.append(line)
-                    else:
-                        config_new.append(line.replace('__', '.'))
-        except IOError as e:
-            print('Config file not found. Please make sure you have a valid .config-file in your products folder.\n'
-                  ' Also make sure that this file has the same name as your product.')
-        try:
-            with open(equation_file_path, 'w+') as eq_file:
-                eq_file.writelines(config_new)
-        except IOError as e:
-            print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
-    else:
-        print('Please check your arguments: --poi <container>:<product>')
+        container_dir = os.environ.get('CONTAINER_DIR')
+        product_name = os.environ.get('PRODUCT_NAME')
+
+    try:
+        generator.generate_equation(container_dir, product_name)
+        print('*** Successfully generated the product equation')
+    except exceptions.EquationGeneratorException as e:
+        raise
+        return
