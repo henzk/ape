@@ -196,15 +196,19 @@ def export_config_to_equation(poi=None):
             elif product_name not in tasks.get_products(container_name):
                 print('No such product')
             else:
-                cont_dir = tasks.get_container_dir(container_name)
-                equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
-                config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
+                container_dir = tasks.get_container_dir(container_name)
+                config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', container_name, product_name, 'product.equation.config')
+                equation_file_path = os.path.join(container_dir, 'products', product_name + '.config')
         else:
             print('Please check your arguments: --poi <container>:<product>')
     else:
-        cont_dir = os.environ.get('CONTAINER_DIR')
-        equation_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME'), 'product.equation')
-        config_file_path = os.path.join(cont_dir, 'products', os.environ.get('PRODUCT_NAME') + '.config')
+        container_dir = os.environ.get('CONTAINER_DIR')
+        product_name = os.environ.get('PRODUCT_NAME')
+        container_name = os.path.basename(container_dir)
+        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', container_name, product_name, 'product.equation.config')
+        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
+
+
     if equation_file_path and config_file_path:
         config_new = list()
         try:
@@ -221,7 +225,7 @@ def export_config_to_equation(poi=None):
             print('Config file not found. Please make sure you have a valid .config-file in your products folder.\n'
                   ' Also make sure that this file has the same name as your product.')
         try:
-            with open(equation_file_path, 'w+') as eq_file:
+            with open(equation_file_path, 'w') as eq_file:
                 eq_file.writelines(config_new)
         except IOError as e:
             print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
