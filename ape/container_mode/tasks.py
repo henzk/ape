@@ -199,8 +199,10 @@ def config_to_equation(poi=None):
     For that you need to have your project imported to featureIDE and set the correct settings.
     """
     import os
+    from . import utils
     config_file_path = None
     equation_file_path = None
+
     if poi:
         parts = poi.split(':')
         if len(parts) == 2:
@@ -211,17 +213,17 @@ def config_to_equation(poi=None):
                 print('No such product')
             else:
                 container_dir = tasks.get_container_dir(container_name)
-                config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', container_name, product_name, 'product.equation.config')
+                config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', utils.get_repo_name(container_dir), product_name, 'product.equation.config')
                 equation_file_path = os.path.join(container_dir, 'products', product_name + '.config')
         else:
             print('Please check your arguments: --poi <container>:<product>')
     else:
         container_dir = os.environ.get('CONTAINER_DIR')
         product_name = os.environ.get('PRODUCT_NAME')
-        container_name = os.path.basename(container_dir)
-        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', container_name, product_name, 'product.equation.config')
-        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
 
+
+        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', utils.get_repo_name(container_dir), product_name, 'product.equation.config')
+        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
 
     if equation_file_path and config_file_path:
         config_new = list()
@@ -255,6 +257,7 @@ def import_config_from_equation(poi=None):
     import os
     config_file_path = None
     equation_file_path = None
+
     if poi:
         parts = poi.split(':')
         if len(parts) == 2:
