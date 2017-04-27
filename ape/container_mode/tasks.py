@@ -75,13 +75,17 @@ def cd(doi):
     a doi can be:
 
     herbert - the container named "herbert"
-    herbert:website - product "website" located in container "herbert"
+    sdox:dev - product "website" located in container "herbert"
     '''
     parts = doi.split(':')
-    if len(parts) == 1:
-        container_name, product_name = parts[0], None
-    elif len(parts) == 2:
+
+    if len(parts) == 2:
         container_name, product_name = parts[0], parts[1]
+    elif len(parts) == 1 and os.environ.get('CONTAINER_NAME'):
+        # interpret poi as product name if already zapped into a product in order
+        # to enable simply switching products by doing ape zap prod.
+        product_name = parts[0]
+        container_name = os.environ.get('CONTAINER_NAME')
     else:
         print 'unable to parse context - format: <container_name>:<product_name>'
         sys.exit(1)
@@ -100,30 +104,40 @@ def cd(doi):
             print 'cd ' + tasks.get_container_dir(container_name)
 
 
-SWITCH_TEMPLATE = '''%(source_header)s
+SWITCH_TEMPLATE = '''{source_header}
 
-export CONTAINER_NAME=%(container_name)s
-export PRODUCT_NAME=%(product_name)s
+export CONTAINER_NAME={container_name}
+export PRODUCT_NAME={product_name}
 update_ape_env
 '''
 
 
 @tasks.register
 def switch(poi):
-    '''switch context to product of interest(poi)
+    """
+    Zaps into a specific product specified by switch context to the product of interest(poi)
+    A poi is:
+        sdox:dev - for product "dev" located in container "sdox"
 
-    a poi is:
+    If poi does not contain a ":" it is interpreted as product name implying that a product within this
+    container is already active. So if this task is called with ape zap prod (and the corresponding container is
+    already zapped in), than only the product is switched.
 
-    herbert:website - for product "website" located in container "herbert"
+    After the context has been switched to sdox:dev additional commands may be available
+    that are relevant to sdox:dev
+    :param poi: product of interest, string: <container_name>:<product_name> or <product_name>.
+    """
 
-    After the context has been switched to herbert:website additional commands may be available
-    that are relevant to herbert:website
-    '''
     parts = poi.split(':')
     if len(parts) == 2:
         container_name, product_name = parts
+    elif len(parts) == 1 and os.environ.get('CONTAINER_NAME'):
+        # interpret poi as product name if already zapped into a product in order
+        # to enable simply switching products by doing ape zap prod.
+        container_name = os.environ.get('CONTAINER_NAME')
+        product_name = parts[0]
     else:
-        print 'unable to parse context: ', poi
+        print 'unable to find poi: ', poi
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
@@ -131,7 +145,7 @@ def switch(poi):
     elif product_name not in tasks.get_products(container_name):
         print 'No such product'
     else:
-        print SWITCH_TEMPLATE % dict(
+        print SWITCH_TEMPLATE.format(
             source_header=tasks.conf.SOURCE_HEADER,
             container_name=container_name,
             product_name=product_name
