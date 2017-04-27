@@ -178,7 +178,7 @@ def get_extra_pypath(container_name=None):
 
 
 @tasks.register
-def export_config_to_equation(poi=None):
+def config_to_equation(poi=None):
     """
     Generates a product.equation file for the given product name.
     It generates it from the <product_name>.config file in the products folder.
