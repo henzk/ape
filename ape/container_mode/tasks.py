@@ -237,9 +237,9 @@ def config_to_equation(poi=None):
                         config_new.append(line)
                     else:
                         config_new.append(line.replace('__', '.'))
+                print('*** Successfully generated product.equation')
         except IOError as e:
-            print('Config file not found. Please make sure you have a valid .config-file in your products folder.\n'
-                  ' Also make sure that this file has the same name as your product.')
+            print('{} does not exist. Make sure your conifg file exists.'.format(config_file_path))
         try:
             with open(equation_file_path, 'w') as eq_file:
                 eq_file.writelines(config_new)
