@@ -234,9 +234,18 @@ def config_to_equation(poi=None):
                     # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
                     # e.g. django_productline__features__development
                     if len(line.split('__')) <= 2:
-                        config_new.append(line)
+                        line = line
                     else:
-                        config_new.append(line.replace('__', '.'))
+                        line = line.replace('__', '.')
+
+                    if line.startswith('abstract_'):
+                        # we skipp abstract features; this is a special case as featureIDE does not work with abstract
+                        # sub trees / leafs.
+                        line = ''
+
+                    config_new.append(line)
+
+
                 print('*** Successfully generated product.equation')
         except IOError as e:
             print('{} does not exist. Make sure your conifg file exists.'.format(config_file_path))
