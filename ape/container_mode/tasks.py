@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, print_function
 from ape import tasks
 import os
 import sys
@@ -48,35 +49,42 @@ def get_products(container_name):
 
 @tasks.register
 def info():
-    '''list information about this productive environment'''
-    print
-    print 'root directory         :', tasks.conf.APE_ROOT
-    print
-    print 'active container       :', os.environ.get('CONTAINER_NAME', '')
-    print
-    print 'active product         :', os.environ.get('PRODUCT_NAME', '')
-    print
-    print 'ape feature selection  :', tasks.FEATURE_SELECTION
-    print
-    print 'containers and products:'
-    print '-' * 30
-    print
+    """
+    List information about this productive environment
+    :return:
+    """
+    print()
+    print('root directory         :', tasks.conf.APE_ROOT)
+    print()
+    print('active container       :', os.environ.get('CONTAINER_NAME', ''))
+    print()
+    print('active product         :', os.environ.get('PRODUCT_NAME', ''))
+    print()
+    print('ape feature selection  :', tasks.FEATURE_SELECTION)
+    print()
+    print('containers and products:')
+    print('-' * 30)
+    print()
     for container_name in tasks.get_containers():
-        print container_name
+        print(container_name)
         for product_name in tasks.get_products(container_name):
-            print '    ' + product_name
-    print
+            print('    ' + product_name)
+    print()
 
 
 @tasks.register
 def cd(doi):
-    '''cd to directory of interest(doi)
+    """
+    cd to directory of interest(doi)
 
     a doi can be:
 
     herbert - the container named "herbert"
     sdox:dev - product "website" located in container "herbert"
-    '''
+    :param doi:
+    :return:
+    """
+
     parts = doi.split(':')
 
     if len(parts) == 2:
@@ -87,21 +95,21 @@ def cd(doi):
         product_name = parts[0]
         container_name = os.environ.get('CONTAINER_NAME')
     else:
-        print 'unable to parse context - format: <container_name>:<product_name>'
+        print('unable to parse context - format: <container_name>:<product_name>')
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
-        print 'No such container'
+        print('No such container')
     else:
         if product_name:
             if product_name not in tasks.get_products(container_name):
-                print 'No such product'
+                print('No such product')
             else:
-                print tasks.conf.SOURCE_HEADER
-                print 'cd ' + tasks.get_product_dir(container_name, product_name)
+                print(tasks.conf.SOURCE_HEADER)
+                print('cd ' + tasks.get_product_dir(container_name, product_name))
         else:
-            print tasks.conf.SOURCE_HEADER
-            print 'cd ' + tasks.get_container_dir(container_name)
+            print(tasks.conf.SOURCE_HEADER)
+            print('cd ' + tasks.get_container_dir(container_name))
 
 
 SWITCH_TEMPLATE = '''{source_header}
@@ -137,24 +145,28 @@ def switch(poi):
         container_name = os.environ.get('CONTAINER_NAME')
         product_name = parts[0]
     else:
-        print 'unable to find poi: ', poi
+        print('unable to find poi: ', poi)
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
-        print 'No such container'
+        print('No such container')
     elif product_name not in tasks.get_products(container_name):
-        print 'No such product'
+        print('No such product')
     else:
-        print SWITCH_TEMPLATE.format(
+        print(SWITCH_TEMPLATE.format(
             source_header=tasks.conf.SOURCE_HEADER,
             container_name=container_name,
             product_name=product_name
-        )
+        ))
 
 
 @tasks.register
 def teleport(poi):
-    '''switch and cd in one operation'''
+    """
+    switch and cd in one operation
+    :param poi:
+    :return:
+    """
     tasks.switch(poi)
     tasks.cd(poi)
 
@@ -173,15 +185,16 @@ def install_container(container_name):
     if os.path.exists(CONTAINER_DIR):
         os.environ['CONTAINER_DIR'] = CONTAINER_DIR
     else:
-        print 'ERROR: this container does not exist!'
+        print('ERROR: this container does not exist!')
         return
 
     install_script = os.path.join(CONTAINER_DIR, 'install.py')
     if os.path.exists(install_script):
-        print '... running install.py for %s' % container_name
+        print('... running install.py for %s' % container_name)
         subprocess.check_call(['python', install_script])
     else:
-        print 'ERROR: this container does not provide an install.py!'
+        print(
+            'ERROR: this container does not provide an install.py!')
         return
 
 
@@ -191,6 +204,56 @@ def get_extra_pypath(container_name=None):
     return pypath.get_extra_pypath()
 
 
+@tasks.register_helper
+def get_poi_tuple(poi=None):
+    """
+    Takes the poi or None and returns the container_dir and the product name either of the passed poi
+    (<container_name>: <product_name>) or from os.environ-
+    :param poi: optional; <container_name>: <product_name>
+    :return: tuple of the container directory and the product name
+    """
+    if poi:
+        parts = poi.split(':')
+        if len(parts) == 2:
+            container_name, product_name = parts
+            if container_name not in tasks.get_containers():
+                print('No such container')
+                sys.exit(1)
+            elif product_name not in tasks.get_products(container_name):
+                print('No such product')
+                sys.exit(1)
+            else:
+                container_dir = tasks.get_container_dir(container_name)
+        else:
+            print('Please check your arguments: --poi <container>:<product>')
+            sys.exit(1)
+    else:
+        container_dir = os.environ.get('CONTAINER_DIR')
+        product_name = os.environ.get('PRODUCT_NAME')
+
+    return container_dir, product_name
+
+
+@tasks.register_helper
+def get_feature_ide_paths(container_dir, product_name):
+    """
+    Takes the container_dir and the product name and returns all relevant paths from the
+    feature_order_json to the config_file_path.
+    :param container_dir: the full path of the container dir
+    :param product_name: the name of the product
+    :return: object with divert path attributes
+    """
+    from . import utils
+    class Paths(object):
+        feature_order_json = os.path.join(container_dir, '_lib/featuremodel/productline/feature_order.json')
+        model_xml_path = os.path.join(container_dir, '_lib/featuremodel/productline/model.xml')
+        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/',
+                                        utils.get_repo_name(container_dir), product_name, 'product.equation.config')
+        equation_file_path = os.path.join(container_dir, 'products', product_name + 'product.equation')
+
+    return Paths
+
+
 @tasks.register
 def config_to_equation(poi=None):
     """
@@ -198,70 +261,66 @@ def config_to_equation(poi=None):
     It generates it from the <product_name>.config file in the products folder.
     For that you need to have your project imported to featureIDE and set the correct settings.
     """
-    import os
+    import json
     from . import utils
-    config_file_path = None
-    equation_file_path = None
 
-    if poi:
-        parts = poi.split(':')
-        if len(parts) == 2:
-            container_name, product_name = parts
-            if container_name not in tasks.get_containers():
-                print('No such container')
-            elif product_name not in tasks.get_products(container_name):
-                print('No such product')
-            else:
-                container_dir = tasks.get_container_dir(container_name)
-                config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', utils.get_repo_name(container_dir), product_name, 'product.equation.config')
-                equation_file_path = os.path.join(container_dir, 'products', product_name + '.config')
-        else:
-            print('Please check your arguments: --poi <container>:<product>')
-    else:
-        container_dir = os.environ.get('CONTAINER_DIR')
-        product_name = os.environ.get('PRODUCT_NAME')
+    container_dir, product_name = tasks.get_poi_tuple(poi=poi)
+    info_object = tasks.get_feature_ide_paths(container_dir, product_name)
 
+    # lets get the feature order from the model.xml
+    feature_order = utils.extract_feature_order_from_model_xml(info_object.model_xml_path)
+    # lets get the ordering constraints
+    with open(info_object.feature_order_json, 'r') as f:
+        ordering_constraints = json.loads(f.read())
 
-        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', utils.get_repo_name(container_dir), product_name, 'product.equation.config')
-        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
+    # run the validator
+    validator = utils.FeatureOrderValidator(feature_order, ordering_constraints)
+    validator.check_order()
+    if validator.has_errors():
+        print('xxx ERROR in your model\'s feature order xxx')
+        for error in validator.get_violations():
+            print('\t', error[1])
+        return
 
-    if equation_file_path and config_file_path:
-        config_new = list()
-        try:
-            with open(config_file_path, 'r') as config_file:
-                config_old = config_file.readlines()
-                for line in config_old:
-                    # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
-                    # e.g. django_productline__features__development
-                    if len(line.split('__')) <= 2:
-                        line = line
-                    else:
-                        line = line.replace('__', '.')
+    # --------------------------------------------------------------------------
+    # The feature order has been checked, no process the config file and create
+    # the product equation.
 
-                    if line.startswith('abstract_'):
-                        # we skipp abstract features; this is a special case as featureIDE does not work with abstract
-                        # sub trees / leafs.
-                        line = ''
+    config_new = list()
+    try:
+        with open(info_object.config_file_path, 'r') as config_file:
+            config_old = config_file.readlines()
+            for line in config_old:
+                # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
+                # e.g. django_productline__features__development
+                if len(line.split('__')) <= 2:
+                    line = line
+                else:
+                    line = line.replace('__', '.')
 
-                    config_new.append(line)
+                if line.startswith('abstract_'):
+                    # we skipp abstract features; this is a special case as featureIDE does not work with abstract
+                    # sub trees / leafs.
+                    line = ''
 
+                config_new.append(line)
 
-                print('*** Successfully generated product.equation')
-        except IOError as e:
-            print('{} does not exist. Make sure your conifg file exists.'.format(config_file_path))
-        try:
-            with open(equation_file_path, 'w') as eq_file:
-                eq_file.writelines(config_new)
-        except IOError as e:
-            print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
-    else:
-        print('Please check your arguments: --poi <container>:<product>')
+            print('*** Successfully generated product.equation')
+    except IOError as e:
+        print('{} does not exist. Make sure your conifg file exists.'.format(info_object.config_file_path))
+    try:
+        with open(info_object.equation_file_path, 'w') as eq_file:
+            eq_file.writelines(config_new)
+    except IOError as e:
+        print(
+            'product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
 
 
 @tasks.register
 def import_config_from_equation(poi=None):
     """
-    Generates a <productname>.config file from the product.equation of the given (or activated) product name and places it in your products dir.
+    Generates a <productname>.config file from the product.equation of the given (or activated)
+    product name and places it in your products dir.
     """
     import os
     config_file_path = None
@@ -301,12 +360,14 @@ def import_config_from_equation(poi=None):
                         else:
                             config_new.append(line.replace('.', '__'))
         except IOError as e:
-            print('Equation file not found. Please make sure you have a valid product.equation in your products/<product_name>/. \n')
+            print(
+                'Equation file not found. Please make sure you have a valid product.equation in your products/<product_name>/. \n')
         try:
             with open(config_file_path, 'w+') as config_file:
                 config_file.writelines(config_new)
         except IOError as e:
             print('{product_name}.config file not found. \n '
-                  'Please make sure you have a valid <product_name>.config in your products directory.'.format(product_name=product_name))
+                  'Please make sure you have a valid <product_name>.config in your products directory.'.format(
+                product_name=product_name))
     else:
         print('Please check your arguments: --poi <container>:<product>')

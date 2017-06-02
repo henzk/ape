@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel>
+		<struct>
+        </struct>
+		<featureOrder userDefined="true">
+			<feature name="a"/>
+			<feature name="b"/>
+			<feature name="c"/>
+			<feature name="d"/>
+			<feature name="e"/>
+		</featureOrder>
+	</featureModel>

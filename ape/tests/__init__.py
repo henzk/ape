@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 import unittest
-from ape.test.argparser import TestArgParser
-from ape.test.invokation import TestTaskInvokation
+from ape.tests.argparser import TestArgParser
+from ape.tests.invokation import TestTaskInvokation
+
+# switch to the director and call python -m unittest discover tests
+
 
 def suite():
     return unittest.TestSuite([
