@@ -255,11 +255,10 @@ def get_feature_ide_paths(container_dir, product_name):
 
 
 @tasks.register
-def config_to_equation(poi=None):
+def validate_feature_model_order(poi=None):
     """
-    Generates a product.equation file for the given product name.
-    It generates it from the <product_name>.config file in the products folder.
-    For that you need to have your project imported to featureIDE and set the correct settings.
+    Validates the order of the feature model (model.xml) against the feature ordering constraints
+    :param poi: optional product of interest
     """
     import json
     from . import utils
@@ -280,11 +279,21 @@ def config_to_equation(poi=None):
         print('xxx ERROR in your model\'s feature order xxx')
         for error in validator.get_violations():
             print('\t', error[1])
-        return
+        sys.exit(1)
 
-    # --------------------------------------------------------------------------
-    # The feature order has been checked, no process the config file and create
-    # the product equation.
+
+@tasks.register
+def config_to_equation(poi=None):
+    """
+    Generates a product.equation file for the given product name.
+    It generates it from the <product_name>.config file in the products folder.
+    For that you need to have your project imported to featureIDE and set the correct settings.
+    """
+
+    container_dir, product_name = tasks.get_poi_tuple(poi=poi)
+    info_object = tasks.get_feature_ide_paths(container_dir, product_name)
+
+    tasks.validate_feature_model_order(poi=poi)
 
     config_new = list()
     try:
