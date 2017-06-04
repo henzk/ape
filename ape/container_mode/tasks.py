@@ -249,7 +249,7 @@ def get_feature_ide_paths(container_dir, product_name):
         model_xml_path = os.path.join(container_dir, '_lib/featuremodel/productline/model.xml')
         config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/',
                                         utils.get_repo_name(container_dir), product_name, 'product.equation.config')
-        equation_file_path = os.path.join(container_dir, 'products', product_name + 'product.equation')
+        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
 
     return Paths
 
@@ -321,14 +321,14 @@ def config_to_equation(poi=None):
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
     info_object = tasks.get_feature_ide_paths(container_dir, product_name)
-
     tasks.validate_feature_model(poi=poi)
 
-    config_new = list()
+    feature_list = list()
+
     try:
         with open(info_object.config_file_path, 'r') as config_file:
-            config_old = config_file.readlines()
-            for line in config_old:
+            config_file = config_file.readlines()
+            for line in config_file:
                 # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
                 # e.g. django_productline__features__development
                 if len(line.split('__')) <= 2:
@@ -341,14 +341,14 @@ def config_to_equation(poi=None):
                     # sub trees / leafs.
                     line = ''
 
-                config_new.append(line)
+                feature_list.append(line)
 
             print('*** Successfully generated product.equation')
     except IOError as e:
         print('{} does not exist. Make sure your conifg file exists.'.format(info_object.config_file_path))
     try:
         with open(info_object.equation_file_path, 'w') as eq_file:
-            eq_file.writelines(config_new)
+            eq_file.writelines(feature_list)
     except IOError as e:
         print(
             'product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
@@ -409,17 +409,3 @@ def import_config_from_equation(poi=None):
                 product_name=product_name))
     else:
         print('Please check your arguments: --poi <container>:<product>')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
