@@ -255,12 +255,11 @@ def get_feature_ide_paths(container_dir, product_name):
 
 
 @tasks.register
-def validate_feature_model_order(poi=None):
+def validate_feature_model(poi=None):
     """
     Validates the order of the feature model (model.xml) against the feature ordering constraints
     :param poi: optional product of interest
     """
-    import json
     from . import utils
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
@@ -269,9 +268,9 @@ def validate_feature_model_order(poi=None):
     # lets get the feature order from the model.xml
     feature_order = utils.extract_feature_order_from_model_xml(info_object.model_xml_path)
     # lets get the ordering constraints
-    with open(info_object.feature_order_json, 'r') as f:
-        ordering_constraints = json.loads(f.read())
+    ordering_constraints = utils.get_feature_order_constraints(container_dir)
 
+    print('*** Starting feature model ordering check')
     # run the validator
     validator = utils.FeatureOrderValidator(feature_order, ordering_constraints)
     validator.check_order()
@@ -280,6 +279,36 @@ def validate_feature_model_order(poi=None):
         for error in validator.get_violations():
             print('\t', error[1])
         sys.exit(1)
+    else:
+        print('\tOK')
+
+
+@tasks.register
+def validate_product_equation(poi=None):
+    """
+    Validates the product equation.
+    Currently does a feature order check.
+    :param poi: optional product of interest
+    """
+    from . import utils
+
+    container_dir, product_name = tasks.get_poi_tuple(poi=poi)
+    feature_list = utils.get_features_from_equation(container_dir, product_name)
+    ordering_constraints = utils.get_feature_order_constraints(container_dir)
+
+    print('*** Starting product.equation ordering check')
+
+    # run the validator
+    validator = utils.ProductEquationFeatureOrderValidator(feature_list, ordering_constraints)
+    validator.check_order()
+
+    if validator.has_errors():
+        print('\txxx ERROR in your product.equation feature order xxx')
+        for error in validator.get_violations():
+            print('\t\t', error[1])
+        sys.exit(1)
+    else:
+        print('\tOK')
 
 
 @tasks.register
@@ -293,7 +322,7 @@ def config_to_equation(poi=None):
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
     info_object = tasks.get_feature_ide_paths(container_dir, product_name)
 
-    tasks.validate_feature_model_order(poi=poi)
+    tasks.validate_feature_model(poi=poi)
 
     config_new = list()
     try:
@@ -380,3 +409,17 @@ def import_config_from_equation(poi=None):
                 product_name=product_name))
     else:
         print('Please check your arguments: --poi <container>:<product>')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
