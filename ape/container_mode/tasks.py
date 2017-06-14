@@ -1,10 +1,9 @@
 from __future__ import unicode_literals, print_function
 from ape import tasks
+from .exceptions import *
 import os
 import sys
 import subprocess
-
-
 class Config(object):
     APE_ROOT = os.environ['APE_ROOT_DIR']
     SOURCE_HEADER = '#please execute the following in your shell:\n'
@@ -149,9 +148,9 @@ def switch(poi):
         sys.exit(1)
 
     if container_name not in tasks.get_containers():
-        print('No such container')
+        raise ContainerNotFound('No such container %s' % container_name)
     elif product_name not in tasks.get_products(container_name):
-        print('No such product')
+        raise ProductNotFound('No such product %s' % product_name)
     else:
         print(SWITCH_TEMPLATE.format(
             source_header=tasks.conf.SOURCE_HEADER,
@@ -409,3 +408,4 @@ def import_config_from_equation(poi=None):
                 product_name=product_name))
     else:
         print('Please check your arguments: --poi <container>:<product>')
+
