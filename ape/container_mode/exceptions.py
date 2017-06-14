@@ -7,3 +7,17 @@ class FeatureNotFound(Exception):
     feature order validator.
     """
     pass
+
+
+class ProductNotFound(Exception):
+    """
+    Raise this exception in case the given product is not found.
+    """
+    pass
+
+
+class ContainerNotFound(Exception):
+    """
+    Raise this exception in case the given container is not found.
+    """
+    pass
