@@ -103,14 +103,21 @@ _init_ape() {
         if [[ "$1" == "cd" || "$1" == "switch" || "$1" == "zap" || "$1" == "teleport" ]]
         then
             _APE_RES=`$APE_BIN "$@"`
+            _APE_ERR=$?
+            if (( "$_APE_ERR" > 0))
+            then
+                return "$_APE_ERR"
+            fi
             if [[ "$_APE_RES" == "#please execute the following in your shell:"* ]]
             then
                 eval "$_APE_RES"
+                return "$?"
             else
                 echo -e $_APE_RES
             fi
         else
             $APE_BIN "$@"
+            return "$?"
         fi
     }
 
