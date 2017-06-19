@@ -1,5 +1,6 @@
 from __future__ import print_function, unicode_literals
-import git, operator
+import git
+import operator
 from . import exceptions
 import xml.etree.ElementTree
 
@@ -16,10 +17,6 @@ def get_repo_name(repo_dir):
     url = repo.remotes.origin.url
 
     return url.split('/')[-1].split('.git')[0]
-
-
-
-
 
 
 def extract_feature_order_from_model_xml(file_path):
