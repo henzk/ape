@@ -1,9 +1,15 @@
 from __future__ import unicode_literals, print_function
+
+import json
+from ape import feaquencer
+
 from ape import tasks
 from .exceptions import *
 import os
 import sys
 import subprocess
+
+
 class Config(object):
     APE_ROOT = os.environ['APE_ROOT_DIR']
     SOURCE_HEADER = '#please execute the following in your shell:\n'
@@ -243,6 +249,7 @@ def get_feature_ide_paths(container_dir, product_name):
     :return: object with divert path attributes
     """
     from . import utils
+
     class Paths(object):
         feature_order_json = os.path.join(container_dir, '_lib/featuremodel/productline/feature_order.json')
         model_xml_path = os.path.join(container_dir, '_lib/featuremodel/productline/model.xml')
@@ -310,6 +317,22 @@ def validate_product_equation(poi=None):
         print('\tOK')
 
 
+@tasks.register_helper
+def get_ordered_feature_list(info_object, feature_list):
+    """
+    Orders the passed feature list by the given, json-formatted feature
+    dependency file using feaquencer's topsort algorithm.
+    :param feature_list:
+    :param info_object:
+    :return:
+    """
+    feature_dependencies = json.load(open(info_object.feature_order_json))
+    feature_selection = [feature for feature in [feature.strip().replace('\n', '')
+                                                 for feature in feature_list]
+                         if len(feature) > 0 and not feature.startswith('_') and not feature.startswith('#')]
+    return [feature + '\n' for feature in feaquencer.get_total_order(feature_selection, feature_dependencies)]
+
+
 @tasks.register
 def config_to_equation(poi=None):
     """
@@ -320,8 +343,6 @@ def config_to_equation(poi=None):
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
     info_object = tasks.get_feature_ide_paths(container_dir, product_name)
-    tasks.validate_feature_model(poi=poi)
-
     feature_list = list()
 
     try:
@@ -341,71 +362,14 @@ def config_to_equation(poi=None):
                     line = ''
 
                 feature_list.append(line)
+    except IOError:
+        print('{} does not exist. Make sure your config file exists.'.format(info_object.config_file_path))
 
-            print('*** Successfully generated product.equation')
-    except IOError as e:
-        print('{} does not exist. Make sure your conifg file exists.'.format(info_object.config_file_path))
+    feature_list = tasks.get_ordered_feature_list(info_object, feature_list)
+    print('*** Successfully generated product.equation')
+
     try:
         with open(info_object.equation_file_path, 'w') as eq_file:
             eq_file.writelines(feature_list)
-    except IOError as e:
-        print(
-            'product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
-
-
-@tasks.register
-def import_config_from_equation(poi=None):
-    """
-    Generates a <productname>.config file from the product.equation of the given (or activated)
-    product name and places it in your products dir.
-    """
-    import os
-    config_file_path = None
-    equation_file_path = None
-
-    if poi:
-        parts = poi.split(':')
-        if len(parts) == 2:
-            container_name, product_name = parts
-            if container_name not in tasks.get_containers():
-                print('No such container')
-            elif product_name not in tasks.get_products(container_name):
-                print('No such product')
-            else:
-                cont_dir = tasks.get_container_dir(container_name)
-                equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
-                config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
-        else:
-            print('Please check your arguments: --poi <container>:<product>')
-    else:
-        # If a product is already activated it gets selected automatically if no arguments are passed.
-        product_name = os.environ.get('PRODUCT_NAME')
-        cont_dir = os.environ.get('CONTAINER_DIR')
-        equation_file_path = os.path.join(cont_dir, 'products', product_name, 'product.equation')
-        config_file_path = os.path.join(cont_dir, 'products', product_name + '.config')
-    if equation_file_path and config_file_path:
-        config_new = list()
-        try:
-            with open(equation_file_path, 'r') as eq_file:
-                config_old = eq_file.readlines()
-                for line in config_old:
-                    # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
-                    # e.g. django_productline__features__development
-                    if not line.startswith('#'):
-                        if len(line.split('.')) <= 2:
-                            config_new.append(line)
-                        else:
-                            config_new.append(line.replace('.', '__'))
-        except IOError as e:
-            print(
-                'Equation file not found. Please make sure you have a valid product.equation in your products/<product_name>/. \n')
-        try:
-            with open(config_file_path, 'w+') as config_file:
-                config_file.writelines(config_new)
-        except IOError as e:
-            print('{product_name}.config file not found. \n '
-                  'Please make sure you have a valid <product_name>.config in your products directory.'.format(
-                product_name=product_name))
-    else:
-        print('Please check your arguments: --poi <container>:<product>')
-
+    except IOError:
+        print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
