@@ -184,7 +184,10 @@ def zap(poi):
 
 @tasks.register
 def install_container(container_name):
-    '''installs a container'''
+    """
+    Installs the container specified by container_name
+    :param container_name: string, name of the container
+    """
 
     CONTAINER_DIR = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
     if os.path.exists(CONTAINER_DIR):
@@ -239,82 +242,64 @@ def get_poi_tuple(poi=None):
     return container_dir, product_name
 
 
-@tasks.register_helper
-def get_feature_ide_paths(container_dir, product_name):
-    """
-    Takes the container_dir and the product name and returns all relevant paths from the
-    feature_order_json to the config_file_path.
-    :param container_dir: the full path of the container dir
-    :param product_name: the name of the product
-    :return: object with divert path attributes
-    """
-    from . import utils
-
-    class Paths(object):
-        feature_order_json = os.path.join(container_dir, '_lib/featuremodel/productline/feature_order.json')
-        model_xml_path = os.path.join(container_dir, '_lib/featuremodel/productline/model.xml')
-        config_file_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/',
-                                        utils.get_repo_name(container_dir), product_name, 'product.equation.config')
-        equation_file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
-
-    return Paths
-
-
-@tasks.register
-def validate_feature_model(poi=None):
-    """
-    Validates the order of the feature model (model.xml) against the feature ordering constraints
-    :param poi: optional product of interest
-    """
-    from . import utils
-
-    container_dir, product_name = tasks.get_poi_tuple(poi=poi)
-    info_object = tasks.get_feature_ide_paths(container_dir, product_name)
-
-    # lets get the feature order from the model.xml
-    feature_order = utils.extract_feature_order_from_model_xml(info_object.model_xml_path)
-    # lets get the ordering constraints
-    ordering_constraints = utils.get_feature_order_constraints(container_dir)
-
-    print('*** Starting feature model ordering check')
-    # run the validator
-    validator = utils.FeatureOrderValidator(feature_order, ordering_constraints)
-    validator.check_order()
-    if validator.has_errors():
-        print('xxx ERROR in your model\'s feature order xxx')
-        for error in validator.get_violations():
-            print('\t', error[1])
-        sys.exit(1)
-    else:
-        print('\tOK')
-
 
 @tasks.register
 def validate_product_equation(poi=None):
     """
     Validates the product equation.
-    Currently does a feature order check.
+    * Validates the feature order
+    * Validates the product spec (mandatory functional features)
     :param poi: optional product of interest
     """
     from . import utils
+    from . import validators
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
     feature_list = utils.get_features_from_equation(container_dir, product_name)
     ordering_constraints = utils.get_feature_order_constraints(container_dir)
+    spec_path = utils.get_feature_ide_paths(container_dir, product_name).product_spec_path
 
-    print('*** Starting product.equation ordering check')
+    print('*** Starting product.equation validation')
 
-    # run the validator
-    validator = utils.ProductEquationFeatureOrderValidator(feature_list, ordering_constraints)
-    validator.check_order()
+    # --------------------------------------------------------
+    # Validate the feature order
+    print('\tChecking feature order')
 
-    if validator.has_errors():
-        print('\txxx ERROR in your product.equation feature order xxx')
-        for error in validator.get_violations():
-            print('\t\t', error[1])
-        sys.exit(1)
+    feature_order_validator = validators.FeatureOrderValidator(feature_list, ordering_constraints)
+    feature_order_validator.check_order()
+
+    if feature_order_validator.has_errors():
+        print('\t\txxx ERROR in your product.equation feature order xxx')
+        for error in feature_order_validator.get_violations():
+            print('\t\t\t', error[1])
     else:
-        print('\tOK')
+        print('\t\tOK')
+
+    # --------------------------------------------------------
+    # Validate the functional product specification
+    print('\tChecking functional product spec')
+
+    if not os.path.exists(spec_path):
+
+        print(
+            '\t\tSkipped - No product spec exists.\n'
+            '\t\tYou may create a product spec if you want to ensure that\n'
+            '\t\trequired functional features are represented in the product equation\n'
+            '\t\t=> Create spec file featuremodel/productline/<container>/product_spec.json'
+        )
+        return
+
+    spec_validator = validators.ProductSpecValidator(spec_path, product_name, feature_list)
+    if not spec_validator.is_valid():
+        if spec_validator.get_errors_mandatory():
+            print('\t\tERROR: The following feature are missing', spec_validator.get_errors_mandatory())
+        if spec_validator.get_errors_never():
+            print('\t\tERROR: The following feature are not allowed', spec_validator.get_errors_never())
+    else:
+        print('\t\tOK')
+
+    if feature_order_validator.has_errors() or spec_validator.has_errors():
+        sys.exit(1)
 
 
 @tasks.register_helper
@@ -327,8 +312,7 @@ def get_ordered_feature_list(info_object, feature_list):
     :return:
     """
     feature_dependencies = json.load(open(info_object.feature_order_json))
-    feature_selection = [feature for feature in [feature.strip().replace('\n', '')
-                                                 for feature in feature_list]
+    feature_selection = [feature for feature in [feature.strip().replace('\n', '') for feature in feature_list]
                          if len(feature) > 0 and not feature.startswith('_') and not feature.startswith('#')]
     return [feature + '\n' for feature in feaquencer.get_total_order(feature_selection, feature_dependencies)]
 
@@ -340,13 +324,16 @@ def config_to_equation(poi=None):
     It generates it from the <product_name>.config file in the products folder.
     For that you need to have your project imported to featureIDE and set the correct settings.
     """
+    from . import utils
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
-    info_object = tasks.get_feature_ide_paths(container_dir, product_name)
+    info_object = utils.get_feature_ide_paths(container_dir, product_name)
     feature_list = list()
 
     try:
+        print('*** Processing ', info_object.config_file_path)
         with open(info_object.config_file_path, 'r') as config_file:
+
             config_file = config_file.readlines()
             for line in config_file:
                 # in FeatureIDE we cant use '.' for the paths to sub-features so we used '__'
@@ -366,10 +353,13 @@ def config_to_equation(poi=None):
         print('{} does not exist. Make sure your config file exists.'.format(info_object.config_file_path))
 
     feature_list = tasks.get_ordered_feature_list(info_object, feature_list)
-    print('*** Successfully generated product.equation')
 
     try:
         with open(info_object.equation_file_path, 'w') as eq_file:
             eq_file.writelines(feature_list)
+        print('*** Successfully generated product.equation')
     except IOError:
         print('product.equation file not found. Please make sure you have a valid product.equation in your chosen product')
+
+    # finally performing the validation of the product equation
+    tasks.validate_product_equation()

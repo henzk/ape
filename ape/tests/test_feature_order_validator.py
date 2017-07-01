@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 import unittest
-from ape.container_mode import utils
+from ape.container_mode import validators
 
 __all__ = ['FeatureOrderValidatorTestCase']
 
@@ -20,7 +20,7 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
             feature_sendfile_xsendfile=dict(after=['feature_sendfile']),
         )
 
-        validator = utils.FeatureOrderValidator(feature_list, constraints)
+        validator = validators.FeatureOrderValidator(feature_list, constraints)
         validator.check_order()
 
     def test_before_violation(self):
@@ -28,7 +28,6 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
             'schnapache',
             'feature_sendfile_xsendfile',
             'feature_sendfile',
-
         ]
 
         constraints = dict(
@@ -37,7 +36,7 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
             feature_sendfile_xsendfile=dict(after=['feature_sendfile']),
         )
 
-        validator = utils.FeatureOrderValidator(feature_list, constraints)
+        validator = validators.FeatureOrderValidator(feature_list, constraints)
         validator.check_order()
 
         self.assertTrue(validator.has_errors())
@@ -52,20 +51,19 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
             e=dict(after=['a', 'b', 'c', 'd'], before=[]),
         )
 
-        validator = utils.FeatureOrderValidator(['a', 'b', 'c', 'd', 'e'], constraints)
+        validator = validators.FeatureOrderValidator(['a', 'b', 'c', 'd', 'e'], constraints)
         validator.check_order()
         self.assertFalse(validator.has_errors())
 
-        validator = utils.FeatureOrderValidator(['b', 'a', 'c', 'd', 'e'], constraints)
+        validator = validators.FeatureOrderValidator(['b', 'a', 'c', 'd', 'e'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
         self.assertEquals(len(validator.get_violations()), 2)
 
-        validator = utils.FeatureOrderValidator(['e', 'd', 'c', 'b', 'a'], constraints)
+        validator = validators.FeatureOrderValidator(['e', 'd', 'c', 'b', 'a'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
         self.assertEquals(len(validator.get_violations()), 20)
-
 
     def test_pos(self):
         constraints = dict(
@@ -75,9 +73,7 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
             d=dict(position=0),
             e=dict(position=4),
         )
-        validator = utils.FeatureOrderValidator(['a', 'b', 'c', 'd', 'e'], constraints)
+        validator = validators.FeatureOrderValidator(['a', 'b', 'c', 'd', 'e'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
         self.assertEquals(len(validator.get_violations()), 1)
-
-
