@@ -29,7 +29,7 @@ class ProductSpecValidator(object):
 
         for feature in self.product_spec.get('never'):
             if feature.replace('__', '.') in self.feature_list:
-                self.errors_bever.append(feature)
+                self.errors_never.append(feature)
 
         return not self.has_errors()
 
