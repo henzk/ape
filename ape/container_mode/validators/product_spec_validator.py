@@ -11,7 +11,7 @@ class ProductSpecValidator(object):
         :param product_name: the name of the product to extract the concrete spec
         :param feature_list: the list of features that will be checked
         """
-        self.product_spec = self._read(spec_path, product_name)
+        self.product_specs = self._read(spec_path, product_name)
         self.feature_list = feature_list
         self.errors_mandatory = []
         self.errors_never = []
@@ -23,13 +23,15 @@ class ProductSpecValidator(object):
         Checks that all "never" features are not contained
         :return: boolean
         """
-        for feature in self.product_spec.get('mandatory'):
-            if feature.replace('__', '.') not in self.feature_list:
-                self.errors_mandatory.append(feature)
+        for spec in self.product_specs:
 
-        for feature in self.product_spec.get('never'):
-            if feature.replace('__', '.') in self.feature_list:
-                self.errors_never.append(feature)
+            for feature in spec.get('mandatory', []):
+                if feature.replace('__', '.') not in self.feature_list:
+                    self.errors_mandatory.append(feature)
+
+            for feature in spec.get('never', []):
+                if feature.replace('__', '.') in self.feature_list:
+                    self.errors_never.append(feature)
 
         return not self.has_errors()
 
@@ -61,7 +63,9 @@ class ProductSpecValidator(object):
         :param product_name:
         :return:
         """
+        matches = []
         with codecs.open(spec_path, 'r') as f:
             for entry in json.loads(f.read()):
                 if product_name in entry.get('products'):
-                    return entry
+                    matches.append(entry)
+        return matches
