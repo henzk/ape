@@ -3,25 +3,36 @@ import featuremonkey
 import inspect
 import sys
 
-from functools import wraps
-
 __version__ = '0.4.0'
 __author__ = 'Hendrik Speidel <hendrik@schnapptack.de>'
 SHORT_HEADER = '''ape - a productive environment
 
 '''
 
-class EnvironmentIncomplete(Exception): pass
 
-class FeatureNotFound(Exception): pass
+class EnvironmentIncomplete(Exception):
+    pass
 
-class TaskNotFound(Exception): pass
 
-class TaskAlreadyRegistered(Exception): pass
+class FeatureNotFound(Exception):
+    pass
 
-class InvalidAccess(Exception): pass
 
-class InvalidTask(Exception): pass
+class TaskNotFound(Exception):
+    pass
+
+
+class TaskAlreadyRegistered(Exception):
+    pass
+
+
+class InvalidAccess(Exception):
+    pass
+
+
+class InvalidTask(Exception):
+    pass
+
 
 def _get_invalid_accessor(func_name):
 
@@ -33,6 +44,7 @@ def _get_invalid_accessor(func_name):
         )
 
     return invalid_accessor
+
 
 def get_signature(name, func):
     """
@@ -90,14 +102,13 @@ class TerminalColor:
         sys.stdout.write(cls.colors['RESET'])
 
 
-
 class Tasks(object):
     """
     Ape tasks registry.
     """
 
     def __init__(self):
-        #import the module that tasks live in
+        # import the module that tasks live in
         from . import _tasks
         self._tasks = _tasks
         self._helper_names = set()
@@ -134,9 +145,8 @@ class Tasks(object):
         """
 
         def predicate(item):
-            return (inspect.isfunction(item) and 
-                item.__name__ not in self._helper_names
-            )
+            return (inspect.isfunction(item) and
+                    item.__name__ not in self._helper_names)
         return inspect.getmembers(self._tasks, predicate)
 
     def get_task(self, name, include_helpers=True):
@@ -155,7 +165,6 @@ class Tasks(object):
         except AttributeError:
             raise TaskNotFound(name)
 
-
     def print_task_help(self, task, name):
         """
         Prints the help for the passed task with the passed name.
@@ -166,13 +175,12 @@ class Tasks(object):
         print(get_signature(name, task))
 
         # TODO: print the location does not work properly and sometimes returns None
-        #print('    => defined in: {}'.format(inspect.getsourcefile(task)))
+        # print('    => defined in: {}'.format(inspect.getsourcefile(task)))
         help_msg = inspect.getdoc(task) or ''
         TerminalColor.reset()
         print('   ' + help_msg.replace('\n', '\n   '))
         TerminalColor.reset()
         print()
-
 
     def help(self, taskname=None):
         """
@@ -216,5 +224,6 @@ class Tasks(object):
         """
         featuremonkey.compose(module, self._tasks)
         self._tasks.FEATURE_SELECTION.append(module.__name__)
+
 
 tasks = Tasks()

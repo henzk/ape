@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -14,8 +15,8 @@ def download(url, target):
     urlp.close()
 
 def mkdir(dirname):
-    print
-    print '*** mkdir  ', dirname
+    print()
+    print('*** mkdir  ', dirname)
     os.mkdir(dirname)
 
 class VirtualEnv(object):
@@ -44,28 +45,29 @@ def main(args):
         use_devel_version = False
 
     if len(args) != 2:
-        print 'Usage:'
-        print
-        print 'bootstrape [--dev] <APE_ROOT_DIR>'
-        print
-        print 'Creates an ape-root at APE_ROOT_DIR for your product lines.'
-        print 'The given directory must not exist already.'
-        print
-        print 'If --dev is given, this installs the latest master from git.'
-        print 'Otherwise, the latest stable version of ape is used from PYPI.'
+        print('''Usage:
+
+        bootstrape [--dev] <APE_ROOT_DIR>'
+
+        Creates an ape-root at APE_ROOT_DIR for your product lines.'
+        The given directory must not exist already.'
+        
+        If --dev is given, this installs the latest master from git.'
+        Otherwise, the latest stable version of ape is used from PYPI.'
+        ''')
 
         sys.exit(1)
 
     ape_root_dir = os.path.abspath(args[1])
 
     if os.path.exists(ape_root_dir):
-        print 'ape root dir already exists: ', ape_root_dir
-        print 'aborted'
+        print('ape root dir already exists: ', ape_root_dir)
+        print('aborted')
         sys.exit(1)
 
     if not os.path.isdir(os.path.dirname(ape_root_dir)):
-        print 'parent directory not found: ', os.path.dirname(ape_root_dir)
-        print 'aborted'
+        print('parent directory not found: ', os.path.dirname(ape_root_dir))
+        print('aborted')
         sys.exit(1)
 
     mkdir(ape_root_dir)
@@ -73,26 +75,26 @@ def main(args):
     mkdir(_ape_dir)
 
     venv_dir = pj(_ape_dir, 'venv')
-    print '*** creating virtualenv ', venv_dir
-    print
+    print('*** creating virtualenv ', venv_dir)
+    print()
     try:
         call(['virtualenv', venv_dir, '--no-site-packages'])
     except OSError:
-        print 'You probably dont have virtualenv installed: sudo apt-get install python-virtualenv'
+        print('You probably dont have virtualenv installed: sudo apt-get install python-virtualenv')
 
     venv = VirtualEnv(venv_dir)
-    print
+    print()
 
     if use_devel_version:
-        print '*** installing ape into virtualenv (latest git master)'
+        print('*** installing ape into virtualenv (latest git master)')
         venv.pip('install', '-e', 'git+https://github.com/henzk/ape.git#egg=ape')
     else:
-        print '*** installing ape into virtualenv (latest from PYPI)'
+        print('*** installing ape into virtualenv (latest from PYPI)')
         venv.pip('install', 'ape')
-    print
+    print()
 
-    print 
-    print '*** creating _ape/activape and aperun scripts'
+    print()
+    print('*** creating _ape/activape and aperun scripts')
     #get the activape_template from inside the ape package installed in venv
     activape_dst = pj(_ape_dir, 'activape')
     venv.python_oneliner(
@@ -118,17 +120,17 @@ def main(args):
     os.chmod(aperun_dst, st.st_mode | stat.S_IEXEC)
 
     if not os.path.isfile(activape_dst):
-        print '!!Error creating activape script!!'
-        print 'aborted'
+        print('!!Error creating activape script!!')
+        print('aborted')
         sys.exit(1)
 
     if not os.path.isfile(aperun_dst):
-        print '!!Error creating aperun script!!'
-        print 'aborted'
+        print('!!Error creating aperun script!!')
+        print('aborted')
         sys.exit(1)
 
-    print
-    print '*** ape container mode setup complete'
+    print()
+    print('*** ape container mode setup complete')
 
 if __name__ == '__main__':
     main(sys.argv)
