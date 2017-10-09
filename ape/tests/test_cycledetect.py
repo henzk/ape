@@ -1,10 +1,14 @@
 from __future__ import absolute_import
-import unittest
 from ape.feaquencer import detect_cycle, topsort
 try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 
 class TestCycleDetection(unittest.TestCase):
 
