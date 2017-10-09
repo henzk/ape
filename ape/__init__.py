@@ -2,7 +2,7 @@ from __future__ import print_function, unicode_literals
 import featuremonkey
 import inspect
 import sys
-from .exceptions import InvalidAccess, InvalidTask, TaskAlreadyRegistered, TaskNotFound
+from .exceptions import InvalidAccess, InvalidTask, TaskAlreadyRegistered, TaskNotFound, FeatureNotFound, EnvironmentIncomplete
 
 __version__ = '0.4.0'
 __author__ = 'Hendrik Speidel <hendrik@schnapptack.de>'

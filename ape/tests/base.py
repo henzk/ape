@@ -1,5 +1,8 @@
 import sys
-from cStringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class SilencedTest(object):

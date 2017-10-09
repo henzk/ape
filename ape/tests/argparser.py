@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 import unittest
-import sys
-from ape.main import get_task_parser, invoke_task
-import sys
+from ape.main import get_task_parser
 from .base import SilencedTest
+
 
 class TestArgParser(SilencedTest, unittest.TestCase):
 
     def test_noparam(self):
 
-        def noparam(): pass
+        def noparam():
+            pass
 
         parser, proxy_args = get_task_parser(noparam)
         self.assertEquals(False, proxy_args)
@@ -20,14 +20,16 @@ class TestArgParser(SilencedTest, unittest.TestCase):
 
     def test_proxy(self):
 
-        def proxyparam(*args): pass
+        def proxyparam(*args):
+            pass
 
         parser, proxy_args = get_task_parser(proxyparam)
         self.assertEquals(True, proxy_args)
 
     def test_positional(self):
 
-        def positionalparams(arg1, arg2): pass
+        def positionalparams(arg1, arg2):
+            pass
 
         parser, proxy_args = get_task_parser(positionalparams)
         self.assertEquals(False, proxy_args)
@@ -38,7 +40,8 @@ class TestArgParser(SilencedTest, unittest.TestCase):
 
     def test_optional(self):
 
-        def optionalparams(kw1='1', kw2='2'): pass
+        def optionalparams(kw1='1', kw2='2'):
+            pass
 
         parser, proxy_args = get_task_parser(optionalparams)
         self.assertEquals(False, proxy_args)
@@ -56,7 +59,8 @@ class TestArgParser(SilencedTest, unittest.TestCase):
 
     def test_positional_and_optional(self):
 
-        def posoptparams(x, y, kw1='1', kw2='2'): pass
+        def posoptparams(x, y, kw1='1', kw2='2'):
+            pass
 
         parser, proxy_args = get_task_parser(posoptparams)
         self.assertEquals(False, proxy_args)

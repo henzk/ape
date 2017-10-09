@@ -1,7 +1,9 @@
 from __future__ import unicode_literals, print_function
-import codecs, json
+import codecs
+import json
 
 __all__ = ['ProductSpecValidator']
+
 
 class ProductSpecValidator(object):
     def __init__(self, spec_path, product_name, feature_list):
