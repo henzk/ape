@@ -7,7 +7,7 @@ try:
     # bundled with python since v2.7
     import importlib
 except ImportError:
-    DEPS += ['importlib', 'unittest2']
+    DEPS += ['importlib', 'unittest2', 'ordereddict']
 
 try:
     # bundled with python since v2.7
