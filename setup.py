@@ -2,18 +2,19 @@
 
 from setuptools import setup, find_packages
 
-DEPS = ['featuremonkey>=0.2.2']
+DEPS = ['featuremonkey>=0.2.2', 'gitpython']
 try:
-    #bundled with python since v2.7
+    # bundled with python since v2.7
     import importlib
 except ImportError:
     DEPS += ['importlib']
 
 try:
-    #bundled with python since v2.7
+    # bundled with python since v2.7
     import argparse
 except ImportError:
     DEPS += ['argparse']
+
 
 def read(fname):
     import os.path
@@ -22,12 +23,13 @@ def read(fname):
     except IOError:
         return ''
 
+
 setup(
     name='ape',
     version='0.4.0',
     description='A Productive Environment - make/rake/ant/fab-like system with support for FOSD',
     long_description=read('README.rst'),
-    url='http://github.com/henzk/ape',
+    url='https://github.com/henzk/ape',
     author='Hendrik Speidel',
     author_email='hendrik@schnapptack.de',
     license="MIT License",

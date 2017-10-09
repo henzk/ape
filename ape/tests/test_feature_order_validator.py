@@ -40,7 +40,7 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
         validator.check_order()
 
         self.assertTrue(validator.has_errors())
-        self.assertEquals(len(validator.get_violations()), 1)
+        self.assertEqual(len(validator.get_violations()), 1)
 
     def test_before_violation2(self):
         constraints = dict(
@@ -58,12 +58,12 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
         validator = validators.FeatureOrderValidator(['b', 'a', 'c', 'd', 'e'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
-        self.assertEquals(len(validator.get_violations()), 2)
+        self.assertEqual(len(validator.get_violations()), 2)
 
         validator = validators.FeatureOrderValidator(['e', 'd', 'c', 'b', 'a'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
-        self.assertEquals(len(validator.get_violations()), 20)
+        self.assertEqual(len(validator.get_violations()), 20)
 
     def test_pos(self):
         constraints = dict(
@@ -76,4 +76,4 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
         validator = validators.FeatureOrderValidator(['a', 'b', 'c', 'd', 'e'], constraints)
         validator.check_order()
         self.assertTrue(validator.has_errors())
-        self.assertEquals(len(validator.get_violations()), 1)
+        self.assertEqual(len(validator.get_violations()), 1)

@@ -1,14 +1,10 @@
 from __future__ import absolute_import
-
 import unittest
 from collections import OrderedDict
-
-from feaquencer import detect_cycle, topsort
+from ape.feaquencer import detect_cycle, topsort
 
 
 class TestCycleDetection(unittest.TestCase):
-    def setUp(self):
-        pass
 
     def test_empty_graph(self):
         self.assertIsNone(detect_cycle(dict()))
@@ -20,10 +16,10 @@ class TestCycleDetection(unittest.TestCase):
         self.assertIsNone(detect_cycle(OrderedDict(a=[], b=[])))
 
     def test_single_node_reflexive_vertex(self):
-        self.assertEquals(['a', 'a'], detect_cycle(dict(a=['a'])))
+        self.assertEqual(['a', 'a'], detect_cycle(dict(a=['a'])))
 
     def test_two_nodes_cycle(self):
-        self.assertEquals(
+        self.assertEqual(
             ['a', 'b', 'a'],
             detect_cycle(
                 OrderedDict([
@@ -34,7 +30,7 @@ class TestCycleDetection(unittest.TestCase):
         )
 
     def test_two_nodes_cycle_r(self):
-        self.assertEquals(
+        self.assertEqual(
             ['b', 'a', 'b'],
             detect_cycle(
                 OrderedDict([
@@ -62,31 +58,31 @@ class TestTopsort(unittest.TestCase):
         pass
 
     def test_empty_graph(self):
-        self.assertEquals(
+        self.assertEqual(
             [],
             topsort(dict())
         )
 
     def test_single_node(self):
-        self.assertEquals(
+        self.assertEqual(
             ['a'],
             topsort(dict(a=[]))
         )
 
     def test_two_nodes(self):
-        self.assertEquals(
+        self.assertEqual(
             ['a', 'b'],
             topsort(dict(a=['b'], b=[]))
         )
 
     def test_three_nodes(self):
-        self.assertEquals(
+        self.assertEqual(
             ['a', 'b', 'c'],
             topsort(dict(a=['b'], b=['c'], c=[]))
         )
 
     def test_forest(self):
-        self.assertEquals(
+        self.assertEqual(
             ['a', 'b', 'c', 'd'],
             topsort(OrderedDict([
                 ('d', []),

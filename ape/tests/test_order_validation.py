@@ -2,8 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 
 import copy
-from feaquencer import (
-    topsort,
+from ape.feaquencer import (
     get_total_order,
     MultipleFirstConditionsError,
     MultipleLastConditionsError
