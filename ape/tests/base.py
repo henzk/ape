@@ -1,6 +1,7 @@
 import sys
 from cStringIO import StringIO
 
+
 class SilencedTest(object):
     '''mixin for unittest.TestCase
     silences the test by redirecting stdout and stderr
@@ -15,4 +16,3 @@ class SilencedTest(object):
     def tearDown(self):
         sys.stdout = self.out
         sys.stderr = self.err
-

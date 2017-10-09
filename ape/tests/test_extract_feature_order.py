@@ -12,7 +12,6 @@ class ExtractFeatureOrderTestCase(unittest.TestCase):
     Test the extract feature order helper.
     """
 
-
     def test_smoke_test(self):
 
         model_xml_path = os.path.join(

@@ -1,7 +1,5 @@
 from __future__ import print_function, unicode_literals
 import git
-import operator
-from . import exceptions
 import xml.etree.ElementTree
 import os.path
 
@@ -43,7 +41,8 @@ def get_feature_order_constraints(container_dir):
     :param container_dir: the container dir.
     :return: dict
     """
-    import os.path, json
+    import os.path
+    import json
 
     file_path = os.path.join(container_dir, '_lib/featuremodel/productline/feature_order.json')
     with open(file_path, 'r') as f:
@@ -59,7 +58,8 @@ def get_features_from_equation(container_dir, product_name):
     :param product_name: name of the product
     :return: list of strings, each representing one feature
     """
-    import featuremonkey, os.path
+    import featuremonkey
+    import os.path
     file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
     return featuremonkey.get_features_from_equation_file(file_path)
 
@@ -82,5 +82,3 @@ def get_feature_ide_paths(container_dir, product_name):
         product_spec_path = os.path.join(container_dir, '_lib/featuremodel/productline/products/', repo_name, 'product_spec.json')
 
     return Paths
-
-

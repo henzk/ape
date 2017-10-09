@@ -104,5 +104,3 @@ class FeatureOrderValidator(object):
 
     def get_violations(self):
         return self.violations
-
-

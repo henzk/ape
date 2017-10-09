@@ -4,7 +4,7 @@ import json
 from ape import feaquencer
 
 from ape import tasks
-from .exceptions import *
+from .exceptions import ContainerNotFound, ProductNotFound
 import os
 import sys
 import subprocess
@@ -240,7 +240,6 @@ def get_poi_tuple(poi=None):
         product_name = os.environ.get('PRODUCT_NAME')
 
     return container_dir, product_name
-
 
 
 @tasks.register

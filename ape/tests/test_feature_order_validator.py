@@ -42,7 +42,7 @@ class FeatureOrderValidatorTestCase(unittest.TestCase):
         self.assertTrue(validator.has_errors())
         self.assertEquals(len(validator.get_violations()), 1)
 
-    def test_before_violation(self):
+    def test_before_violation2(self):
         constraints = dict(
             a=dict(is_first=True, after=[], before=['b', 'c', 'd', 'e']),
             b=dict(after=['a'], before=['c', 'd', 'e']),

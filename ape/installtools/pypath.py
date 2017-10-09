@@ -1,6 +1,7 @@
 import os
 import json
 
+
 def get_extra_pypath(container_name=None):
     container_name = container_name or os.environ['CONTAINER_DIR']
     paths_file = '%s/_lib/paths.json' % container_name
@@ -11,8 +12,10 @@ def get_extra_pypath(container_name=None):
         with open(paths_file, 'r') as f:
             return json.loads(f.read())
 
+
 def generate_pypath_for_initenv():
     return ':'.join(get_extra_pypath()[1:])
 
+
 if __name__ == '__main__':
-    print generate_pypath_for_initenv(),
+    print(generate_pypath_for_initenv(), end='')

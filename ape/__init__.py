@@ -2,36 +2,13 @@ from __future__ import print_function, unicode_literals
 import featuremonkey
 import inspect
 import sys
+from .exceptions import InvalidAccess, InvalidTask, TaskAlreadyRegistered, TaskNotFound
 
 __version__ = '0.4.0'
 __author__ = 'Hendrik Speidel <hendrik@schnapptack.de>'
 SHORT_HEADER = '''ape - a productive environment
 
 '''
-
-
-class EnvironmentIncomplete(Exception):
-    pass
-
-
-class FeatureNotFound(Exception):
-    pass
-
-
-class TaskNotFound(Exception):
-    pass
-
-
-class TaskAlreadyRegistered(Exception):
-    pass
-
-
-class InvalidAccess(Exception):
-    pass
-
-
-class InvalidTask(Exception):
-    pass
 
 
 def _get_invalid_accessor(func_name):

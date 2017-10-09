@@ -1,11 +1,12 @@
 from __future__ import absolute_import
 import unittest
-import sys
-from ape.main import get_task_parser, invoke_task
-import sys
+from ape.main import invoke_task
 from .base import SilencedTest
 
-class InvalidParam(object): pass
+
+class InvalidParam(object):
+    pass
+
 
 class Params(object):
     def __init__(self):
@@ -23,11 +24,13 @@ class Params(object):
         else:
             self._data[name] = value
 
+
 class TestTaskInvokation(SilencedTest, unittest.TestCase):
 
     def test_noparam(self):
 
         params = Params()
+
         def noparam():
             params.called = True
 
@@ -39,6 +42,7 @@ class TestTaskInvokation(SilencedTest, unittest.TestCase):
     def test_proxy(self):
 
         params = Params()
+
         def proxyparam(*args):
             params.args = args
 
@@ -52,6 +56,7 @@ class TestTaskInvokation(SilencedTest, unittest.TestCase):
     def test_positional(self):
 
         params = Params()
+
         def positionalparams(arg1, arg2):
             params.args = (arg1, arg2)
 
@@ -59,16 +64,13 @@ class TestTaskInvokation(SilencedTest, unittest.TestCase):
         invoke_task(positionalparams, testargs)
         self.assertEqual(testargs, params.args)
 
-        self.assertRaises(SystemExit, invoke_task,
-            positionalparams, 'arg1only'.split()
-        )
-        self.assertRaises(SystemExit, invoke_task,
-            positionalparams, 'arg1 arg2 1argtoomany'.split()
-        )
+        self.assertRaises(SystemExit, invoke_task, positionalparams, 'arg1only'.split())
+        self.assertRaises(SystemExit, invoke_task, positionalparams, 'arg1 arg2 1argtoomany'.split())
 
     def test_optional(self):
 
         params = Params()
+
         def optionalparams(kw1='1', kw2='2'):
             params.kws = (kw1, kw2)
 
@@ -84,16 +86,13 @@ class TestTaskInvokation(SilencedTest, unittest.TestCase):
         invoke_task(optionalparams, testargs)
         self.assertEqual(('1', '2'), params.kws)
 
-        self.assertRaises(SystemExit, invoke_task,
-            optionalparams, 'posarg --kw1 aa'.split()
-        )
-        self.assertRaises(SystemExit, invoke_task,
-            optionalparams, 'posarg1 posarg2'.split()
-        )
+        self.assertRaises(SystemExit, invoke_task, optionalparams, 'posarg --kw1 aa'.split())
+        self.assertRaises(SystemExit, invoke_task, optionalparams, 'posarg1 posarg2'.split())
 
     def test_positional_and_optional(self):
 
         params = Params()
+
         def posoptparams(x, y, kw1='1', kw2='2'):
             params.args = (x, y)
             params.kws = (kw1, kw2)
@@ -113,9 +112,5 @@ class TestTaskInvokation(SilencedTest, unittest.TestCase):
         self.assertEqual(('a', 'b'), params.args)
         self.assertEqual(('1', '2'), params.kws)
 
-        self.assertRaises(SystemExit, invoke_task,
-            posoptparams, 'posarg --kw1 aa'.split()
-        )
-        self.assertRaises(SystemExit, invoke_task,
-            posoptparams, 'posarg1 posarg2 posarg3'.split()
-        )
+        self.assertRaises(SystemExit, invoke_task, posoptparams, 'posarg --kw1 aa'.split())
+        self.assertRaises(SystemExit, invoke_task, posoptparams, 'posarg1 posarg2 posarg3'.split())
