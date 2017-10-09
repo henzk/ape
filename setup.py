@@ -7,7 +7,7 @@ try:
     # bundled with python since v2.7
     import importlib
 except ImportError:
-    DEPS += ['importlib']
+    DEPS += ['importlib', 'unittest2']
 
 try:
     # bundled with python since v2.7
