@@ -5,9 +5,15 @@ import importlib
 import sys
 import os
 import traceback
-from ape import tasks, TaskNotFound, FeatureNotFound, EnvironmentIncomplete
+from ape import tasks, TaskNotFound, FeatureNotFound, EnvironmentIncomplete, InvalidTask
 from featuremonkey import get_features_from_equation_file
 
+ERRMSG_UNSUPPORTED_SIG = '''Task "%s" has an unsupported signature.
+Supported signatures are:
+    - *args only
+    - combination of explicit positional and explicit keyword args
+    - **kws are NOT supported
+'''
 
 def get_task_parser(task):
     '''
@@ -38,7 +44,7 @@ def get_task_parser(task):
     elif not args and varargs and not keywords and not defaults:
         return parser, True
     else:
-        raise
+        raise InvalidTask(ERRMSG_UNSUPPORTED_SIG % task.__name__)
 
 
 def invoke_task(task, args):

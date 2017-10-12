@@ -1,13 +1,12 @@
 from __future__ import unicode_literals, print_function
 
-import json
-from ape import feaquencer
-
-from ape import tasks
-from .exceptions import ContainerNotFound, ProductNotFound
 import os
 import sys
 import subprocess
+import json
+from ape import feaquencer
+from ape import tasks
+from .exceptions import ContainerError, ContainerNotFound, ProductNotFound
 
 
 class Config(object):
@@ -45,11 +44,10 @@ def get_products(container_name):
         return []
     products = os.listdir(products_dir)
 
-    def predicate(p):
+    def is_product(p):
         return not p.startswith('.') and not p.startswith('_')
 
-    products = filter(predicate, products)
-    return products
+    return [p for p in products if is_product(p)]
 
 
 @tasks.register
@@ -189,21 +187,18 @@ def install_container(container_name):
     :param container_name: string, name of the container
     """
 
-    CONTAINER_DIR = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
-    if os.path.exists(CONTAINER_DIR):
-        os.environ['CONTAINER_DIR'] = CONTAINER_DIR
+    container_dir = os.path.join(os.environ['APE_ROOT_DIR'], container_name)
+    if os.path.exists(container_dir):
+        os.environ['CONTAINER_DIR'] = container_dir
     else:
-        print('ERROR: this container does not exist!')
-        return
+        raise ContainerNotFound('ERROR: container directory not found: %s' % container_dir)
 
-    install_script = os.path.join(CONTAINER_DIR, 'install.py')
+    install_script = os.path.join(container_dir, 'install.py')
     if os.path.exists(install_script):
         print('... running install.py for %s' % container_name)
         subprocess.check_call(['python', install_script])
     else:
-        print(
-            'ERROR: this container does not provide an install.py!')
-        return
+        raise ContainerError('ERROR: this container does not provide an install.py!')
 
 
 @tasks.register_helper

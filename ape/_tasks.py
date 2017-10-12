@@ -64,7 +64,7 @@ def explain_feature(featurename):
         ).communicate()[0]
         return stdout.strip() or '-'
 
-    if featurename in featuremonkey.get_features_from_equation_file(os.environ['PRODUCT_EQUATION_FILENAME']): 
+    if featurename in featuremonkey.get_features_from_equation_file(os.environ['PRODUCT_EQUATION_FILENAME']):
         print()
         print(featurename)
         print('-' * 60)
@@ -91,7 +91,6 @@ def explain_feature(featurename):
 
 
 def explain_features():
-
     '''print the location of each feature and its version
 
     if the feature is located inside a git repository, this will also print the git-rev and modified files

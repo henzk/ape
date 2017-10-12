@@ -58,7 +58,7 @@ def fetch_pool(repo_url, branch='master'):
     print('... fetching %s ' % repo_name)
 
     if os.path.exists(os.path.join(lib_dir, repo_name)):
-        print('ERROR: repository already exists') 
+        print('ERROR: repository already exists')
         sys.exit()
 
     try:

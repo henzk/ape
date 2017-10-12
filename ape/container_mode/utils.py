@@ -41,7 +41,6 @@ def get_feature_order_constraints(container_dir):
     :param container_dir: the container dir.
     :return: dict
     """
-    import os.path
     import json
 
     file_path = os.path.join(container_dir, '_lib/featuremodel/productline/feature_order.json')
@@ -59,7 +58,6 @@ def get_features_from_equation(container_dir, product_name):
     :return: list of strings, each representing one feature
     """
     import featuremonkey
-    import os.path
     file_path = os.path.join(container_dir, 'products', product_name, 'product.equation')
     return featuremonkey.get_features_from_equation_file(file_path)
 

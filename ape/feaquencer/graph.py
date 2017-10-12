@@ -36,7 +36,7 @@ def _dfs_cycle_detect(graph, node, path, visited_nodes):
     visited_nodes.add(node)
     for target in graph[node]:
         if target in path:
-            #cycle found => return current path
+            # cycle found => return current path
             return path + [target]
         else:
             return _dfs_cycle_detect(graph, target, path + [target], visited_nodes)

@@ -16,7 +16,13 @@ class ProductNotFound(Exception):
     pass
 
 
-class ContainerNotFound(Exception):
+class ContainerError(Exception):
+    """
+    Represents a generic SPL-Container related error.
+    """
+
+
+class ContainerNotFound(ContainerError):
     """
     Raise this exception in case the given container is not found.
     """
