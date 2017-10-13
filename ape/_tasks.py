@@ -103,3 +103,12 @@ def explain_features():
 
     for featurename in featurenames:
         tasks.explain_feature(featurename)
+
+
+def selftest():
+    '''run ape tests'''
+    from ape import tests
+
+    result = tests.run_all()
+    if not result.wasSuccessful():
+        raise Exception('Selftests failed! :(')
