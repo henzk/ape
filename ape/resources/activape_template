@@ -22,9 +22,22 @@ _init_ape() {
     export APE_GLOBAL_PYTHONPATH="${PYTHONPATH}:${APE_DEPS}"
     export PYTHONPATH=$APE_GLOBAL_PYTHONPATH
     export APE_OLDPROMPT=$PS1
+    export APE_ENVIRONMENT="_"
+
+    ACTIVATE_SCRIPT="/bin/activate"
+
+    if [ -f "${APE_VIRTUALENV}/bin/activate" ]
+        then
+            ACTIVATE_SCRIPT="/bin/activate"
+    fi
+
+    if [ -f "${APE_VIRTUALENV}/Scripts/activate" ]
+        then
+            ACTIVATE_SCRIPT="/Scripts/activate"
+    fi
 
     ## activate global virtualenv
-    source ${APE_VIRTUALENV}/bin/activate
+    source ${APE_VIRTUALENV}${ACTIVATE_SCRIPT}
     
     if [ -f "${APE_ROOT_DIR}/initenv" ]
         then
@@ -35,7 +48,7 @@ _init_ape() {
     APE_COLOR="\e[0;32m"
     RESET_COLOR="\e[m"
 
-    APE_HOST=`hostname --fqdn`
+    APE_HOST=`python -c "import platform;print(platform.uname()[1])"`
 
     ## use special colors for special host - e.g. red on production machine
     if [[ "$APE_HOST" == "myserver.mynetwork" ]]
@@ -60,20 +73,20 @@ _init_ape() {
             export PYTHONPATH=$APE_GLOBAL_PYTHONPATH
             export APE_CONTAINER_VENV=""
             ## activate global virtualenv
-            source ${APE_VIRTUALENV}/bin/activate
+            source ${APE_VIRTUALENV}${ACTIVATE_SCRIPT}
         fi
         export APE_ENVIRONMENT="${CONTAINER_NAME}:${PRODUCT_NAME}"
         export CONTAINER_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}
         export PRODUCT_DIR=${APE_ROOT_DIR}/${CONTAINER_NAME}/products/${PRODUCT_NAME}
 
-        if [ -f "${CONTAINER_DIR}/_lib/venv/bin/activate" ]
+        if [ -f "${CONTAINER_DIR}/_lib/venv${ACTIVATE_SCRIPT}" ]
         then
             deactivate
             export APE_CONTAINER_VENV="${CONTAINER_DIR}/_lib/venv"
             echo ""
             echo "=> switched to virtualenv: ${APE_CONTAINER_VENV}"
             echo ""
-            source ${APE_CONTAINER_VENV}/bin/activate
+            source ${APE_CONTAINER_VENV}${ACTIVATE_SCRIPT}
         else
             echo ""
             echo "=> using global virtualenv: ${APE_VIRTUALENV}"

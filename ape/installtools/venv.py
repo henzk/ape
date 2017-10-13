@@ -7,7 +7,7 @@ class VirtualEnv(object):
 
     def __init__(self, venv_dir):
         self.venv_dir = venv_dir
-        self.bin_dir = os.path.join(venv_dir, 'bin')
+        self.bin_dir = os.path.join(venv_dir, 'Scripts' if os.name == 'nt' else 'bin')
 
     def call_bin(self, script_name, args):
         check_call([os.path.join(self.bin_dir, script_name)] + list(args))
@@ -20,9 +20,22 @@ class VirtualEnv(object):
         self.call_bin('pip', ['install', '-r', file_path])
 
     def get_paths(self):
+        '''
+        get list of module paths
+        '''
+
+        # guess site package dir of virtualenv (system dependent)
+        venv_site_packages = '%s/lib/site-packages' % self.venv_dir
+
+        if not os.path.isdir(venv_site_packages):
+            venv_site_packages_glob = glob.glob('%s/lib/*/site-packages' % self.venv_dir)
+
+            if len(venv_site_packages_glob):
+                venv_site_packages = venv_site_packages_glob[0]
+
         return [
             self.venv_dir,
-            glob.glob('%s/lib/*/site-packages' % self.venv_dir)[0]
+            venv_site_packages
         ]
 
     def pip(self, *args):
