@@ -7,17 +7,8 @@ from subprocess import call
 from os.path import join as pj
 
 
-def download(url, target):
-    import urllib
-    urlp = urllib.urlopen(url)
-    with open(target, 'w') as localfile:
-        localfile.write(urlp.read())
-    urlp.close()
-
-
 def mkdir(dirname):
-    print()
-    print('*** mkdir  ', dirname)
+    print('*** mkdir', dirname)
     os.mkdir(dirname)
 
 
@@ -105,13 +96,14 @@ def main(args):
         print('aborted')
         sys.exit(1)
 
+    print('### bootstrapping new ape root at: %s' % ape_root_dir)
+
     mkdir(ape_root_dir)
     _ape_dir = pj(ape_root_dir, '_ape')
     mkdir(_ape_dir)
 
     venv_dir = pj(_ape_dir, 'venv')
     print('*** creating virtualenv ', venv_dir)
-    print()
     if venv_mechanism == 'VIRTUALENV':
         try:
             call(['virtualenv', venv_dir, '--no-site-packages'])
@@ -123,21 +115,22 @@ def main(args):
         call([sys.executable or 'python', '-m', 'venv', venv_dir])
 
     venv = VirtualEnv(venv_dir)
-    print()
 
     if use_ape_version == 'GITMASTER':
         print('*** installing ape into virtualenv (latest git master)')
+        print()
         venv.pip('install', '-e', 'git+https://github.com/henzk/ape.git#egg=ape')
     elif use_ape_version == 'PYPI':
         print('*** installing ape into virtualenv (latest from PYPI)')
+        print()
         venv.pip('install', 'ape')
     elif use_ape_version == 'LOCALCHECKOUT':
         print('*** installing ape into virtualenv (using local checkout)')
+        print()
         package_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         venv.pip('install', '-e', package_dir)
     print()
 
-    print()
     print('*** creating _ape/activape and aperun scripts')
     # get the activape_template from inside the ape package installed in venv
     activape_dst = pj(_ape_dir, 'activape')
@@ -171,7 +164,6 @@ def main(args):
         print('aborted')
         sys.exit(1)
 
-    print()
     print('*** ape container mode setup complete')
 
 
