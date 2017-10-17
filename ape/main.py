@@ -5,8 +5,10 @@ import importlib
 import sys
 import os
 import traceback
-from ape import tasks, TaskNotFound, FeatureNotFound, EnvironmentIncomplete, InvalidTask
 from featuremonkey import get_features_from_equation_file
+from ape.exceptions import TaskNotFound, FeatureNotFound, EnvironmentIncomplete, InvalidTask
+from ape import tasks
+
 
 ERRMSG_UNSUPPORTED_SIG = '''Task "%s" has an unsupported signature.
 Supported signatures are:
@@ -15,15 +17,16 @@ Supported signatures are:
     - **kws are NOT supported
 '''
 
-def get_task_parser(task):
-    '''
-    construct an ArgumentParser for task
-    this function returns a tuple (parser, proxy_args)
-    if task accepts varargs only, proxy_args is True.
-    if task accepts only positional and explicit keyword args,
-    proxy args is False.
-    '''
 
+def get_task_parser(task):
+    """
+    Construct an ArgumentParser for the given task.
+
+    This function returns a tuple (parser, proxy_args).
+    If task accepts varargs only, proxy_args is True.
+    If task accepts only positional and explicit keyword args,
+    proxy args is False.
+    """
     args, varargs, keywords, defaults = inspect.getargspec(task)
     defaults = defaults or []
     parser = argparse.ArgumentParser(
@@ -48,9 +51,14 @@ def get_task_parser(task):
 
 
 def invoke_task(task, args):
-    '''
-    invoke task with args
-    '''
+    """
+    Parse args and invoke task function.
+
+    :param task: task function to invoke
+    :param args: arguments to the task (list of str)
+    :return: result of task function
+    :rtype: object
+    """
     parser, proxy_args = get_task_parser(task)
     if proxy_args:
         return task(*args)
@@ -127,18 +135,17 @@ def run(args, features=None):
 
 
 def main():
-    '''
-    entry point when used via command line
+    """
+    Entry point when used via command line.
 
-    features are given using the environment variable ``PRODUCT_EQUATION``.
+    Features are given using the environment variable ``PRODUCT_EQUATION``.
     If it is not set, ``PRODUCT_EQUATION_FILENAME`` is tried: if it points
     to an existing equation file that selection is used.
 
     (if ``APE_PREPEND_FEATURES`` is given, those features are prepended)
 
     If the list of features is empty, ``ape.EnvironmentIncomplete`` is raised.
-    '''
-
+    """
     # check APE_PREPEND_FEATURES
     features = os.environ.get('APE_PREPEND_FEATURES', '').split()
     # features can be specified inline in PRODUCT_EQUATION
