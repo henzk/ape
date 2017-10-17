@@ -53,30 +53,65 @@ def invoke_task(task, args):
     '''
     parser, proxy_args = get_task_parser(task)
     if proxy_args:
-        task(*args)
+        return task(*args)
     else:
         pargs = parser.parse_args(args)
-        task(**vars(pargs))
+        return task(**vars(pargs))
+
+
+def get_task_module(feature):
+    """
+    Return imported task module of feature.
+
+    This function first tries to import the feature and raises FeatureNotFound
+    if that is not possible.
+    Thereafter, it looks for a submodules called ``apetasks`` and ``tasks`` in that order.
+    If such a submodule exists, it is imported and returned.
+
+    :param feature: name of feature to fet task module for.
+    :raises: FeatureNotFound if feature_module could not be imported.
+    :return: imported module containing the ape tasks of feature or None,
+                if module cannot be imported.
+    """
+    try:
+        importlib.import_module(feature)
+    except ImportError:
+        raise FeatureNotFound(feature)
+
+    tasks_module = None
+
+    # ape tasks may be located in a module called apetasks
+    # or (if no apetasks module exists) in a module called tasks
+    try:
+        tasks_module = importlib.import_module(feature + '.apetasks')
+    except ImportError:
+        # No apetasks module in feature ... try tasks
+        pass
+
+    try:
+        tasks_module = importlib.import_module(feature + '.tasks')
+    except ImportError:
+        # No tasks module in feature ... skip it
+        pass
+
+    return tasks_module
 
 
 def run(args, features=None):
-    '''
-    composes task modules of the selected features and calls the
-    task given by args
-    '''
+    """
+    Run an ape task.
 
+    Composes task modules out of the selected features and calls the
+    task with arguments.
+
+    :param args: list comprised of task name followed by arguments
+    :param features: list of features to compose before invoking the task
+    """
     features = features or []
     for feature in features:
-        try:
-            importlib.import_module(feature)
-        except ImportError:
-            raise FeatureNotFound(feature)
-        try:
-            tasks_module = importlib.import_module(feature + '.tasks')
+        tasks_module = get_task_module(feature)
+        if tasks_module:
             tasks.superimpose(tasks_module)
-        except ImportError:
-            # No tasks module in feature ... skip it
-            pass
 
     if len(args) < 2 or (len(args) == 2 and args[1] == 'help'):
         tasks.help()
