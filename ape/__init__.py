@@ -96,8 +96,8 @@ class Tasks(object):
 
         If a task by that name already exists,
         a TaskAlreadyRegistered exception is raised.
-        :param func:
-        :return:
+        :param func: func to register as an ape task
+        :return: invalid accessor
         """
 
         if hasattr(self._tasks, func.__name__):
@@ -109,8 +109,8 @@ class Tasks(object):
         """
         A helper is a task that is not directly exposed to
         the command line
-        :param func:
-        :return:
+        :param func: registers func as a helper
+        :return: invalid accessor
         """
 
         self._helper_names.add(func.__name__)
@@ -130,9 +130,9 @@ class Tasks(object):
         """
         Get task identified by name or raise TaskNotFound if there
         is no such task
-        :param name:
-        :param include_helpers:
-        :return:
+        :param name: name of helper/task to get
+        :param include_helpers: if True, also look for helpers
+        :return: task or helper identified by name
         """
 
         if not include_helpers and name in self._helper_names:
@@ -147,6 +147,7 @@ class Tasks(object):
         Prints the help for the passed task with the passed name.
         :param task: the task function object
         :param name: the name of the module.
+        :return: None
         """
         TerminalColor.set('GREEN')
         print(get_signature(name, task))
@@ -162,8 +163,9 @@ class Tasks(object):
     def help(self, taskname=None):
         """
         List tasks or provide help for specific task
-        :param taskname:
-        :return:
+        :param taskname: if supplied, help for this specific task is displayed.
+            Otherwise, displays overview of available tasks.
+        :return: None
         """
 
         if not taskname:
@@ -187,8 +189,8 @@ class Tasks(object):
         Simple proxy to tasks module
         tasks have to be accessed using only this method,
         e.g. ape.tasks.foo() to call the foo task.
-        :param name:
-        :return:
+        :param name: name of the task to access
+        :return: task function
         """
 
         return self.get_task(name)
@@ -196,8 +198,8 @@ class Tasks(object):
     def superimpose(self, module):
         """
         superimpose a task module on registered tasks'''
-        :param module:
-        :return:
+        :param module: ape tasks module that is superimposed on available ape tasks
+        :return: None
         """
         featuremonkey.compose(module, self._tasks)
         self._tasks.FEATURE_SELECTION.append(module.__name__)
