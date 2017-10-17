@@ -7,14 +7,15 @@ def get_extra_pypath(container_name=None):
     paths_file = '%s/_lib/paths.json' % container_name
 
     if not os.path.exists(paths_file):
-        raise Exception('ERROR: _lib/paths.json does not exist. Did you run your container install script?')
+        raise Exception('ERROR: _lib/paths.json does not exist. Did you run ``ape install_container``?')
     else:
         with open(paths_file, 'r') as f:
             return json.loads(f.read())
 
 
 def generate_pypath_for_initenv():
-    return ':'.join(get_extra_pypath()[1:])
+    separator = ';' if os.name == 'nt' else ':'
+    return separator.join(get_extra_pypath()[1:])
 
 
 if __name__ == '__main__':

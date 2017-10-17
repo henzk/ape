@@ -111,8 +111,10 @@ def add_to_path(*args):
         else:
             paths.append(path)
 
-    target = os.path.join(os.environ['CONTAINER_DIR'], '_lib/paths.json')
-    f = open(target, 'w')
-    f.write(json.dumps(paths))
-    f.close()
+    # normalize paths
+    paths = [path.replace('\\', '/') for path in paths]
+
+    target = os.path.join(get_lib_dir(), 'paths.json')
+    with open(target, 'w') as fp:
+        fp.write(json.dumps(paths, indent=4))
     print('... wrote paths.json')
