@@ -32,6 +32,10 @@ class MultipleLastConditionsError(Exception):
         self.occurences = [occ1, occ2]
 
 
+class AfterConditionToLastError(Exception):
+    pass
+
+
 class OrderingCondition(object):
     name = None
     subject = None
@@ -82,8 +86,16 @@ class OrderingConditions(object):
                 )
 
         elif ctype == AFTER:
-            # transform after to before by switching objects
-            self.before[condition.name].append(condition.subject)
+            if self.last and condition.subject == self.last:
+                raise AfterConditionToLastError(
+                    '\n After condition was applied to last condition: \n \t Condition: {condition} \n \t Last condition: {last}'.format(
+                        last=self.last,
+                        condition="{} {} {}".format(condition.name, condition.ctype, condition.subject)
+                    )
+                )
+            else:
+                # transform after to before by switching objects
+                self.before[condition.name].append(condition.subject)
 
 
 def _get_formatted_feature_dependencies(data):
