@@ -7,6 +7,7 @@ import xml.etree.ElementTree
 
 import featuremonkey
 import git
+import time
 
 
 def get_repo_name(repo_dir):
@@ -62,6 +63,30 @@ def get_features_from_equation(container_dir, product_name):
     return featuremonkey.get_features_from_equation_file(file_path)
 
 
+def get_equation_git_string(fm_path):
+    repo = git.Repo(fm_path)
+    template = "# Generated on {timestamp} from {repo}@{commit} \n"
+    try:
+        repo_url = list(repo.remote().urls)[0]
+    except IndexError:
+        repo_url = "unknown"
+    timestamp = time.strftime("%d/%m/%Y - %I:%M:%S")
+    commit_hash = str(repo.commit())[:15]
+    return template.format(
+        commit=commit_hash,
+        repo=repo_url,
+        timestamp=timestamp
+    )
+
+
+def _path_is_valid_featuremodel_dir(path):
+    check_list = (
+        path is not None and os.path.exists(path),
+        path is not None and os.path.isdir(path)
+    )
+    return False not in check_list
+
+
 def _get_featuremodel_path(container_dir):
     """
     Either takes default path (relative to ape root) or, if set, the FEATUREMODEL_POOL_PATH.
@@ -69,19 +94,19 @@ def _get_featuremodel_path(container_dir):
 
         export FEATUREMODEL_POOL_PATH=$PYTHONPATH:`/foo/bar/featuremodel`
 
-    We assume that the featuremodel pool is placed top level in the ape root and is called "featuremodel".
-    Reason: the featurepool model should be considerable for any project in your ape root and
-    therefore you only need it once, not separated in every container.
+    Selection of the path is based on its specificity. Most specific first, most generic last.
     :return:
     """
-    featuremodel_path = os.path.abspath(os.path.join(os.environ.get('APE_ROOT_DIR'), 'featuremodel'))
+    featuremodel_path = None
     env_path = os.environ.get('FEATUREMODEL_POOL_PATH')
     if env_path:
         featuremodel_path = env_path
 
-    # still try a fallback to the featuremodel pool in the _lib dir in case something is wrong the the given paths
-    if not os.path.exists(featuremodel_path) or not os.path.isdir(featuremodel_path):
-        featuremodel_path = os.path.join(container_dir, '_lib/featuremodel')
+    if not _path_is_valid_featuremodel_dir(featuremodel_path):
+        featuremodel_path = os.path.abspath(os.path.join(container_dir, '_lib/featuremodel'))
+
+    if not _path_is_valid_featuremodel_dir(featuremodel_path):
+        featuremodel_path = os.path.abspath(os.path.join(os.environ.get('APE_ROOT_DIR'), 'featuremodel'))
 
     return featuremodel_path
 
@@ -98,6 +123,7 @@ def get_feature_ide_paths(container_dir, product_name):
     featuremodel_path = _get_featuremodel_path(container_dir)
 
     class Paths(object):
+        fm_path = featuremodel_path
         feature_order_json = os.path.join(featuremodel_path, 'productline/feature_order.json')
         model_xml_path = os.path.join(featuremodel_path, 'productline/model.xml')
         config_file_path = os.path.join(featuremodel_path, 'productline/products/', repo_name, product_name, 'product.equation.config')

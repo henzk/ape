@@ -1,11 +1,14 @@
 from __future__ import unicode_literals, print_function
 
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
+import sys
+
 from ape import feaquencer
 from ape import tasks
+
+from . import utils
 from .exceptions import ContainerError, ContainerNotFound, ProductNotFound
 
 
@@ -274,7 +277,6 @@ def validate_product_equation(poi=None):
     print('\tChecking functional product spec')
 
     if not os.path.exists(spec_path):
-
         print(
             '\t\tSkipped - No product spec exists.\n'
             '\t\tYou may create a product spec if you want to ensure that\n'
@@ -318,7 +320,6 @@ def config_to_equation(poi=None):
     It generates it from the <product_name>.config file in the products folder.
     For that you need to have your project imported to featureIDE and set the correct settings.
     """
-    from . import utils
 
     container_dir, product_name = tasks.get_poi_tuple(poi=poi)
     info_object = utils.get_feature_ide_paths(container_dir, product_name)
@@ -347,7 +348,7 @@ def config_to_equation(poi=None):
         print('{} does not exist. Make sure your config file exists.'.format(info_object.config_file_path))
 
     feature_list = tasks.get_ordered_feature_list(info_object, feature_list)
-
+    feature_list.insert(0, utils.get_equation_git_string(info_object.fm_path))
     try:
         with open(info_object.equation_file_path, 'w') as eq_file:
             eq_file.writelines(feature_list)
