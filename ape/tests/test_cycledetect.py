@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 from ape.feaquencer import detect_cycle, topsort
 try:
     from collections import OrderedDict

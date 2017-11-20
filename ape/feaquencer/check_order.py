@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import copy
 
-from . import topsort
+from . import topsort, GraphCycleError
 from . import detect_cycle
 
 C_TYPES = (
@@ -53,16 +53,18 @@ class OrderingCondition(object):
 
 
 class OrderingConditions(object):
-    def __init__(self):
+    def __init__(self, ordering_conditions=None):
         self.first = None
         self.last = None
         # self.before stores features as keys.
         # Each feature has a list of features which need to be loaded before the feature.
         self.before = defaultdict(list)
+        if ordering_conditions:
+            for condition in ordering_conditions:
+                self.add_condition(condition)
 
     def add_condition(self, condition):
         ctype = condition.ctype
-
         if ctype == FIRST:
             if not self.first:
                 self.first = condition.name
@@ -160,29 +162,68 @@ def _get_condition_instances(data):
     return conditions
 
 
-def get_total_order(feature_selection, feature_dependencies):
-    feature_set = set(feature_selection)
-    condition_list = _get_condition_instances(_get_formatted_feature_dependencies(feature_dependencies))
-    oc = OrderingConditions()
-    for condition in condition_list:
-        oc.add_condition(condition)
-    first = copy.deepcopy(oc.first)
-    last = copy.deepcopy(oc.last)
-    graph = copy.deepcopy(oc.before)
-    for feature in feature_selection:
-        if feature not in graph.keys():
-            graph[feature] = list()
-    for feature in graph.keys():
-        if first:
-            if feature != first:
-                graph[feature].append(first)
-        if last:
-            if feature != last:
-                graph[last].append(feature)
-    if not detect_cycle(graph):
-        total_order_with_too_many_features = reversed(topsort(graph))
+class Feaquencer(object):
+    def __init__(self, feature_selection, feature_dependencies):
+        self.feature_set = set(feature_selection)
+        self.feature_dependencies = feature_dependencies
+
+    def arrange(self):
+        self._init_graph()
+        self._enrich_graph()
+        self._validate_graph()
+
+    def get_order(self):
+        return self._get_total_order()
+
+    def _init_graph(self):
+        ordering_conditions = self._get_conditions()
+        self.first = copy.deepcopy(ordering_conditions.first)
+        self.last = copy.deepcopy(ordering_conditions.last)
+        self.graph = copy.deepcopy(ordering_conditions.before)
+
+    def _get_conditions(self):
+        condition_list = _get_condition_instances(_get_formatted_feature_dependencies(self.feature_dependencies))
+        return OrderingConditions(condition_list)
+
+    def _enrich_graph(self):
+        """
+        Enrich the graph with the implicit conditions (first appears in every before-list,
+        before-list of last should contain every feature, ...)
+        :return:
+        """
+        self._add_missing_nodes()
+        self._populate_befores()
+
+    def _populate_befores(self):
+        for feature in self.graph.keys():
+            if self.first:
+                if feature != self.first and feature not in set(self.graph[feature]):
+                    self.graph[feature].append(self.first)
+            if self.last:
+                if feature != self.last and feature not in set(self.graph[self.last]):
+                    self.graph[self.last].append(feature)
+
+    def _add_missing_nodes(self):
+        features_in_graph = set(self.graph.keys())
+        for feature in self.feature_set:
+            if feature not in features_in_graph:
+                self.graph[feature] = list()
+
+    def _validate_graph(self):
+        cycle = detect_cycle(self.graph)
+        if cycle:
+            raise GraphCycleError(cycle)
+
+    def _get_total_order(self):
+        total_order_with_too_many_features = reversed(topsort(self.graph))
         total_order_with_selected_features = list()
         for feature in total_order_with_too_many_features:
-            if feature in feature_set:
+            if feature in self.feature_set:
                 total_order_with_selected_features.append(feature)
         return total_order_with_selected_features
+
+
+def get_total_order(feature_selection, feature_dependencies):
+    feaquencer = Feaquencer(feature_selection, feature_dependencies)
+    feaquencer.arrange()
+    return feaquencer.get_order()
