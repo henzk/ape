@@ -20,11 +20,8 @@ class VirtualEnv(object):
         file_path = os.path.join(os.environ['CONTAINER_DIR'], file_path)
         self.call_bin('pip', ['install', '-r', file_path])
 
-    def get_paths(self):
-        '''
-        get list of module paths
-        '''
-
+    def get_site_packages_dir(self):
+        """Return path to site_packages dir of this venv."""
         # guess site package dir of virtualenv (system dependent)
         venv_site_packages = '%s/lib/site-packages' % self.venv_dir
 
@@ -34,9 +31,12 @@ class VirtualEnv(object):
             if len(venv_site_packages_glob):
                 venv_site_packages = venv_site_packages_glob[0]
 
+        return venv_site_packages.replace('\\', '/')
+
+    def get_paths(self):
+        """Get list of module paths."""
         return [
-            self.venv_dir,
-            venv_site_packages
+            self.get_site_packages_dir()
         ]
 
     def pip(self, *args):
@@ -51,12 +51,11 @@ class VirtualEnv(object):
     @staticmethod
     def create_virtualenv(venv_dir, use_venv_module=True):
         """
-        creates a new virtualenv in venv_dir
+        Create a new virtualenv in venv_dir.
 
         By default, the built-in venv module is used.
         On older versions of python, you may set use_venv_module to False to use virtualenv
         """
-
         if not use_venv_module:
             try:
                 check_call(['virtualenv', venv_dir, '--no-site-packages'])

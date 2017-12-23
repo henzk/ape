@@ -15,7 +15,7 @@ def get_extra_pypath(container_name=None):
 
 def generate_pypath_for_initenv():
     separator = ';' if os.name == 'nt' else ':'
-    return separator.join(get_extra_pypath()[1:])
+    return separator.join(get_extra_pypath())
 
 
 if __name__ == '__main__':

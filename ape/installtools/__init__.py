@@ -104,7 +104,14 @@ def fetch_pool(repo_url, branch='master', reuse_existing=False):
 
 def add_to_path(*args):
     print('... adding paths')
-    paths = []
+    venv_dir = get_project_venv_dir()
+    venv = VirtualEnv(venv_dir)
+    site_packages = venv.get_site_packages_dir()
+
+    paths = [
+        os.environ['CONTAINER_DIR'] + '/products',
+        os.environ['CONTAINER_DIR'] + '/features',
+    ]
     for path in args:
         if type(path) == list:
             paths += path
@@ -113,8 +120,18 @@ def add_to_path(*args):
 
     # normalize paths
     paths = [path.replace('\\', '/') for path in paths]
+    if site_packages in paths:
+        paths.remove(site_packages)
+
+    # in the past, all those paths would go into paths.json
+    # and the container level initenv would put those on the pythonpath
+    # the current implementation adds those paths to ape_extra_paths.pth
+    # in the site_packages folder of the virtualenv
+    # only the site_packages folder gets written to paths.json
+    with open(os.path.join(site_packages, 'ape_extra_paths.pth'), 'w') as fp:
+        fp.write('\n'.join(paths))
 
     target = os.path.join(get_lib_dir(), 'paths.json')
     with open(target, 'w') as fp:
-        fp.write(json.dumps(paths, indent=4))
+        fp.write(json.dumps([site_packages], indent=4))
     print('... wrote paths.json')
