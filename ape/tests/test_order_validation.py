@@ -5,7 +5,8 @@ import copy
 from ape.feaquencer import (
     get_total_order,
     MultipleFirstConditionsError,
-    MultipleLastConditionsError
+    MultipleLastConditionsError,
+    GraphCycleError
 )
 
 # Randomly ordered feature selection
@@ -21,7 +22,7 @@ feature_selection = [
 ]
 
 feature_dependencies = {
-    'django_productline.features.djpladmin': dict(
+    'django_productline.features.staticfiles': dict(
         after=['django_productline']
     ),
     'django_productline': dict(
@@ -29,9 +30,6 @@ feature_dependencies = {
     ),
     'schnadmin2': dict(
         after=['lessbuilder', 'django_productline.features.djpladmin']
-    ),
-    'styler': dict(
-        after=['django_productline']
     ),
     'schnadmin2_sidenav': dict(
         after=['schnadmin2']
@@ -54,12 +52,12 @@ class OrderValidationTest(unittest.TestCase):
 
     def test_check_for_multiple_first(self):
         fd = copy.deepcopy(feature_dependencies)
-        fd['styler']['first'] = True
+        fd['lessbuilder']['first'] = True
         self.assertRaises(MultipleFirstConditionsError, get_total_order, feature_selection, fd)
 
     def test_check_for_multiple_last(self):
         fd = copy.deepcopy(feature_dependencies)
-        fd['styler']['last'] = True
+        fd['lessbuilder']['last'] = True
         self.assertRaises(MultipleLastConditionsError, get_total_order, feature_selection, fd)
 
     def test_check_django_productline_order(self):
@@ -81,3 +79,11 @@ class OrderValidationTest(unittest.TestCase):
         fd = copy.deepcopy(feature_dependencies)
         order = get_total_order(feature_selection, fd)
         self.assertTrue(order.index('django_productline.features.development') == len(order) - 1)
+
+    def test_raise_graph_cycle_error(self):
+        fd = copy.deepcopy(feature_dependencies)
+        # create cycle:
+        #        before         before
+        #  statics => lessbuilder => statics
+        fd['lessbuilder']['after'] = ['statics']
+        self.assertRaises(GraphCycleError, get_total_order, feature_selection, fd)

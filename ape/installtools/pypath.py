@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import os
 import json
 
@@ -20,4 +20,4 @@ def generate_pypath_for_initenv():
 
 
 if __name__ == '__main__':
-    print(generate_pypath_for_initenv(), end='')
+    print(generate_pypath_for_initenv())

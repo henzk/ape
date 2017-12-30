@@ -1,7 +1,9 @@
-from subprocess import check_call
+from __future__ import print_function, unicode_literals
+
 import glob
 import os
 import sys
+from subprocess import check_call
 
 
 class VirtualEnv(object):

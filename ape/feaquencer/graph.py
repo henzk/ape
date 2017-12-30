@@ -1,12 +1,19 @@
+from __future__ import unicode_literals
+
 from collections import defaultdict
 
 
-def to_graphviz(graph):
-    """
+class GraphCycleError(Exception):
+    def __init__(self, cycle):
+        msg = "Cycle was detected in dependency graph: \n \t"
+        for idx, feature in enumerate(cycle):
+            msg += " {feature}".format(feature=feature)
+            if idx != (len(cycle) - 1):
+                msg += " =>"
+        super(GraphCycleError, self).__init__(msg)
 
-    :param graph:
-    :return:
-    """
+
+def to_graphviz(graph):
     ret = ['digraph g {']
     vertices = []
 
